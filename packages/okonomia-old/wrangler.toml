@@ -1,0 +1,24 @@
+name = "counter"
+type = "javascript"
+
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
+
+[build]
+command = "yarn build"          ## --build-command
+watch_dir = "src"               ## --build-watch-path
+
+[build.upload]
+format = "modules"
+main = "./index.mjs"
+
+[durable_objects]
+bindings = [
+  { name = "COUNTER", class_name = "Counter" },
+]
+
+# wrangler.toml
+[miniflare]
+durable_objects_persist = true # Defaults to ./.mf/do
