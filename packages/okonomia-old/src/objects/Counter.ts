@@ -1,7 +1,7 @@
-import DurableObject, { Route, Visible } from './DurableObject';
+import DurableObject, { Route, Field } from './DurableObject';
 
 class Counter extends DurableObject {
-  @Visible
+  @Field()
   value: number = 0;
 
   async initialize() {

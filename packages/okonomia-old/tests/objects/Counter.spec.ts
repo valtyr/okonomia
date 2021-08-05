@@ -2,7 +2,7 @@ import { getMiniflareTestInterface } from '../utils.js';
 
 const test = getMiniflareTestInterface();
 
-test('Server is up', async t => {
+test.skip('Server is up', async t => {
   try {
     const ns = await t.context.mf.getDurableObjectNamespace('COUNTER');
     const stub = ns.get(ns.newUniqueId());

@@ -1,6 +1,10 @@
 import { Router } from 'itty-router';
 import 'reflect-metadata';
 
+interface Env {
+  COUNTER: DurableObjectNamespace;
+}
+
 abstract class DurableObject {
   state: DurableObjectState;
   router: Router = Router();
@@ -24,6 +28,17 @@ abstract class DurableObject {
     });
   }
 
+  get fields(): string[] {
+    let fields = [];
+    let target = Object.getPrototypeOf(this);
+    while (target != Object.prototype) {
+      let childFields = Reflect.getOwnMetadata('fields', target) || [];
+      fields.push(...childFields);
+      target = Object.getPrototypeOf(target);
+    }
+    return fields;
+  }
+
   abstract initialize(): Promise<void>;
 
   async fetch(request: Request) {
@@ -40,14 +55,11 @@ abstract class DurableObject {
   }
 
   serialize() {
-    // console.error(this);
-    // let returnObject: { [_: string]: any } = {};
-    // this.__visibleKeys.forEach(key => {
-    //   returnObject[key] = this[key] as any;
-    // });
-
-    // console.error(returnObject);
-    return JSON.stringify(this);
+    const entries: [string, unknown][] = this.fields.map(key => [
+      key,
+      this[key as keyof this],
+    ]);
+    return JSON.stringify(Object.fromEntries(entries));
   }
 }
 
@@ -74,8 +86,14 @@ export function Route(path: string) {
   };
 }
 
-export const Visible = <T extends DurableObject>(target: T, key: keyof T) => {
-  Reflect.defineMetadata(`serializer:visible:${key}`, undefined, target);
-};
+export function Field(): PropertyDecorator {
+  return (target, key) => {
+    const fields = Reflect.getOwnMetadata('fields', target) || [];
+    if (!fields.includes(key)) {
+      fields.push(key);
+    }
+    Reflect.defineMetadata('fields', fields, target);
+  };
+}
 
 export default DurableObject;
