@@ -1,8 +1,14 @@
 import JSZip from 'jszip';
 
 export const generateZip = async () => {
-  const zip = new JSZip();
-  zip.file('Hello.txt', 'Hello, world!\n');
+  const template = await fetch(
+    'https://github.com/valtyr/okonomia/blob/master/templates/costco.pkpass?raw=true',
+  );
+
+  const blob = await template.arrayBuffer();
+
+  const zip = await JSZip.loadAsync(blob);
+  zip.remove('manifest.json');
 
   const files = Object.entries(zip.files);
   const manifestEntries = await Promise.all(
