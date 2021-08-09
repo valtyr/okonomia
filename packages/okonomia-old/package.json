@@ -8,7 +8,7 @@
     "test": "yarn build && ava **/*.spec.ts  **/**/*.spec.ts",
     "format": "prettier --write '**/*.{js,css,json,md}'",
     "build": "esbuild src/index.ts --format=esm --bundle --sourcemap --outfile=dist/index.mjs",
-    "dev": "miniflare --watch --debug"
+    "dev": "miniflare --watch --debug --kv USERS"
   },
   "author": "Valtýr Örn Kjartansson <valtyr@gmail.com>",
   "license": "MIT",
@@ -23,8 +23,13 @@
   },
   "dependencies": {
     "@cloudflare/workers-types": "^2.2.2",
+    "@types/node-forge": "^0.10.2",
     "itty-router": "^2.3.10",
-    "reflect-metadata": "^0.1.13"
+    "jszip": "^3.7.1",
+    "nanoid": "^3.1.23",
+    "node-forge": "^0.10.0",
+    "reflect-metadata": "^0.1.13",
+    "zod": "^3.7.1"
   },
   "ava": {
     "extensions": {

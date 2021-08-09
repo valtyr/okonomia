@@ -9,6 +9,7 @@ export const miniflareSetup = (t: ExecutionContext) => {
     // This will override the option in wrangler.toml.
     buildCommand: undefined,
     durableObjectsPersist: false,
+    kvPersist: false,
   });
   t.context = { mf };
 };
