@@ -7,33 +7,10 @@ import { Buffer } from 'buffer';
 // 'https://github.com/valtyr/okonomia/blob/master/templates/costco.pkpass?raw=true'
 
 function hex(a: ArrayBuffer) {
-  var h = '';
-  var b = new Uint8Array(a);
-  for (var i = 0; i < b.length; i++) {
-    var hi = b[i].toString(16);
-    h += hi.length === 1 ? '0' + hi : hi;
-  }
-  return h;
+  return [...new Uint8Array(a)]
+    .map(x => x.toString(16).padStart(2, '0'))
+    .join('');
 }
-
-const calculateSHA1Digest = async (file: JSZip.JSZipObject) => {
-  const contents = await file.async('arraybuffer');
-  const digest = await crypto.subtle.digest('SHA-1', contents);
-  const hash = [...new Uint8Array(digest)]
-    .map(x => x.toString(16).padStart(2, '0'))
-    .join('');
-  return hash;
-};
-
-const calculateSHA1DigestFromString = async (str: string) => {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const digest = await crypto.subtle.digest('SHA-1', data);
-  const hash = [...new Uint8Array(digest)]
-    .map(x => x.toString(16).padStart(2, '0'))
-    .join('');
-  return hash;
-};
 
 /**
  * Create and sign a `.pkpass` based on a `.zip` template containing all assets
@@ -74,26 +51,13 @@ const generatePass = async (
     files.map(async ([path, file]) => {
       const contents = await file.async('arraybuffer');
       const digest = await crypto.subtle.digest('SHA-1', contents);
-      // const hash = [...new Uint8Array(digest)]
-      //   .map(x => x.toString(16).padStart(2, '0'))
-      //   .join('');
       const hash = hex(digest);
-
       return [path, hash];
     }),
   );
+
   const manifest = Object.fromEntries(manifestEntries);
-  // const manifestString = JSON.stringify(manifest);
-
-  manifest['pass.json'] = await calculateSHA1DigestFromString(passText);
-
-  const manifestString = JSON.stringify({
-    'pass.json': 'baf84bcc88f5cf74e60e845a6c139e3ef0024330',
-    'icon.png': '2ce5e70ba457339cfa2cbeed569dd88c71fe376b',
-    'icon@2x.png': '71dc4262330ff2ff1dac6b3818e2e45e4e912da3',
-    'logo.png': '13eaf7b79da424084416c0b8842df5dcfb4230a6',
-    'logo@2x.png': 'd8149cd8da8c23f9519c974892dfcad8d3543a50',
-  });
+  const manifestString = JSON.stringify(manifest);
 
   // Prepare certificate and keys
   const preparedCertificate = forge.pki.certificateFromPem(certificate);

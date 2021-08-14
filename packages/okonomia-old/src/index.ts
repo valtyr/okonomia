@@ -46,54 +46,34 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
         primaryFields: [
           {
             key: 'member',
-            label: 'MEMBER NAME',
-            value: 'Johnny Appleseed',
+            label: 'Nafn',
+            value: 'Sigurður Ingi Sigurðarson',
             // changeMessage: 'Member name changed to %@.',
           },
         ],
-        // secondaryFields: [
-        //   {
-        //     key: 'membershipNumber',
-        //     label: 'MEMBERSHIP #',
-        //     value: '123456789123456789',
-        //     // changeMessage: 'Changed to %@',
-        //   },
-        // ],
-        // auxiliaryFields: [
-        //   {
-        //     key: 'group',
-        //     label: 'BICE RESTAURANT GROUP',
-        //     value: 'W00182',
-        //     changeMessage: 'Changed to %@',
-        //   },
-        //   {
-        //     key: 'memberSince',
-        //     label: 'MEMBER SINCE',
-        //     value: '10/2007',
-        //     changeMessage: 'Changed to %@',
-        //     textAlignment: 'PKTextAlignmentRight',
-        //   },
-        // ],
-        // backFields: [
-        //   {
-        //     key: 'info',
-        //     label: 'COSTCO',
-        //     value:
-        //       "We invite you to see for yourself why 50 million people are Costco members. You'll appreciate the quality and value of the products you find at our warehouses. That's our promise to you. If we fail to deliver on that promise, we'll refund your money. It's that simple.",
-        //   },
-        //   {
-        //     key: 'passSourceUpdate',
-        //     label: 'update this pass',
-        //     value:
-        //       'https://www.passsource.com/pass/register.php?hashedSerialNumber=eNortjIysVIKtUj1MbPIL_FL1ffNLgzxNYssrXB3tLVVsgZcMJveCYY,&',
-        //   },
-        //   {
-        //     key: 'passSourceSignature',
-        //     label: 'created by PassSource',
-        //     value:
-        //       'For more information or to create your own passes, visit: https://www.passsource.com\nThis pass may contain trademarks that are not licensed or affiliated with PassSource.  The trademarks are owned by their respective entities.  This pass is for personal convenience and is not guaranteed to function or be usable at a merchant.  Please direct any concerns or questions to support+passback@kudit.com.',
-        //   },
-        // ],
+        secondaryFields: [
+          {
+            key: 'membershipNumber',
+            label: 'Meðlimsnúmer',
+            value: '123456789123456789',
+            // changeMessage: 'Changed to %@',
+          },
+        ],
+        auxiliaryFields: [
+          {
+            key: 'memberSince',
+            label: 'Gildistími',
+            value: 'Ágúst 2020 - Júlí 2021',
+          },
+        ],
+        backFields: [
+          {
+            key: 'info',
+            label: 'Afslættir',
+            value:
+              'Þetta kort veitir þér afslætti á drykkjum á eftirfarandi stöðum: \n • Sæta Svínið - 20% \n • Jólahúsið Akureyri - 20%',
+          },
+        ],
       },
       serialNumber: '6110757dcaa70',
       formatVersion: 1,
