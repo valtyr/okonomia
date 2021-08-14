@@ -1,9 +1,39 @@
 import JSZip from 'jszip';
 import { PKPass } from './format';
 import * as forge from 'node-forge';
+import { Buffer } from 'buffer';
 
 // Template URL
 // 'https://github.com/valtyr/okonomia/blob/master/templates/costco.pkpass?raw=true'
+
+function hex(a: ArrayBuffer) {
+  var h = '';
+  var b = new Uint8Array(a);
+  for (var i = 0; i < b.length; i++) {
+    var hi = b[i].toString(16);
+    h += hi.length === 1 ? '0' + hi : hi;
+  }
+  return h;
+}
+
+const calculateSHA1Digest = async (file: JSZip.JSZipObject) => {
+  const contents = await file.async('arraybuffer');
+  const digest = await crypto.subtle.digest('SHA-1', contents);
+  const hash = [...new Uint8Array(digest)]
+    .map(x => x.toString(16).padStart(2, '0'))
+    .join('');
+  return hash;
+};
+
+const calculateSHA1DigestFromString = async (str: string) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const digest = await crypto.subtle.digest('SHA-1', data);
+  const hash = [...new Uint8Array(digest)]
+    .map(x => x.toString(16).padStart(2, '0'))
+    .join('');
+  return hash;
+};
 
 /**
  * Create and sign a `.pkpass` based on a `.zip` template containing all assets
@@ -18,8 +48,8 @@ import * as forge from 'node-forge';
 const generatePass = async (
   templateUrl: string,
   pass: PKPass,
-  certificate: string | forge.pki.Certificate,
-  privateKey: string | forge.pki.PrivateKey,
+  certificate: string,
+  privateKey: string,
 ) => {
   // Fetch the template file
   const template = await fetch(templateUrl);
@@ -33,40 +63,48 @@ const generatePass = async (
   zip.remove('signature');
   zip.remove('pass.json');
 
+  const passText = `${JSON.stringify(pass)}\n`;
+
   // Add new pass.json file
-  zip.file('pass.json', JSON.stringify(pass));
+  zip.file('pass.json', Buffer.from(passText));
 
   // Generate manifest.json file
   const files = Object.entries(zip.files);
   const manifestEntries = await Promise.all(
     files.map(async ([path, file]) => {
-      const contents = await file.async('uint8array');
-      const digest = await crypto.subtle.digest({ name: 'SHA-1' }, contents);
-
-      const hash = [...new Uint8Array(digest)]
-        .map(x => x.toString(16).padStart(2, '0'))
-        .join('');
+      const contents = await file.async('arraybuffer');
+      const digest = await crypto.subtle.digest('SHA-1', contents);
+      // const hash = [...new Uint8Array(digest)]
+      //   .map(x => x.toString(16).padStart(2, '0'))
+      //   .join('');
+      const hash = hex(digest);
 
       return [path, hash];
     }),
   );
   const manifest = Object.fromEntries(manifestEntries);
-  const manifestString = JSON.stringify(manifest);
+  // const manifestString = JSON.stringify(manifest);
+
+  manifest['pass.json'] = await calculateSHA1DigestFromString(passText);
+
+  const manifestString = JSON.stringify({
+    'pass.json': 'baf84bcc88f5cf74e60e845a6c139e3ef0024330',
+    'icon.png': '2ce5e70ba457339cfa2cbeed569dd88c71fe376b',
+    'icon@2x.png': '71dc4262330ff2ff1dac6b3818e2e45e4e912da3',
+    'logo.png': '13eaf7b79da424084416c0b8842df5dcfb4230a6',
+    'logo@2x.png': 'd8149cd8da8c23f9519c974892dfcad8d3543a50',
+  });
 
   // Prepare certificate and keys
-  const preparedCertificate =
-    typeof certificate === 'string'
-      ? forge.pki.certificateFromPem(certificate)
-      : certificate;
-  const preparedPrivateKey =
-    typeof privateKey === 'string'
-      ? forge.pki.privateKeyFromPem(privateKey)
-      : privateKey;
+  const preparedCertificate = forge.pki.certificateFromPem(certificate);
+
+  // Prepare certificate and keys
+  const preparedKey = forge.pki.privateKeyFromPem(privateKey);
 
   // Create signature
   const signature = signManifest(
     preparedCertificate,
-    preparedPrivateKey,
+    preparedKey,
     manifestString,
   );
 
@@ -76,7 +114,7 @@ const generatePass = async (
 
   // Generate and return a buffer from the zip archive
   const buffer = await zip.generateAsync({
-    type: 'uint8array',
+    type: 'arraybuffer',
   });
   return buffer;
 };
@@ -85,46 +123,46 @@ export default generatePass;
 
 const APPLE_CA_CERTIFICATE = forge.pki.certificateFromPem(
   `-----BEGIN CERTIFICATE-----
-MIIEUTCCAzmgAwIBAgIQfK9pCiW3Of57m0R6wXjF7jANBgkqhkiG9w0BAQsFADBi
-MQswCQYDVQQGEwJVUzETMBEGA1UEChMKQXBwbGUgSW5jLjEmMCQGA1UECxMdQXBw
-bGUgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkxFjAUBgNVBAMTDUFwcGxlIFJvb3Qg
-Q0EwHhcNMjAwMjE5MTgxMzQ3WhcNMzAwMjIwMDAwMDAwWjB1MUQwQgYDVQQDDDtB
-cHBsZSBXb3JsZHdpZGUgRGV2ZWxvcGVyIFJlbGF0aW9ucyBDZXJ0aWZpY2F0aW9u
-IEF1dGhvcml0eTELMAkGA1UECwwCRzMxEzARBgNVBAoMCkFwcGxlIEluYy4xCzAJ
-BgNVBAYTAlVTMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2PWJ/KhZ
-C4fHTJEuLVaQ03gdpDDppUjvC0O/LYT7JF1FG+XrWTYSXFRknmxiLbTGl8rMPPbW
-BpH85QKmHGq0edVny6zpPwcR4YS8Rx1mjjmi6LRJ7TrS4RBgeo6TjMrA2gzAg9Dj
-+ZHWp4zIwXPirkbRYp2SqJBgN31ols2N4Pyb+ni743uvLRfdW/6AWSN1F7gSwe0b
-5TTO/iK1nkmw5VW/j4SiPKi6xYaVFuQAyZ8D0MyzOhZ71gVcnetHrg21LYwOaU1A
-0EtMOwSejSGxrC5DVDDOwYqGlJhL32oNP/77HK6XF8J4CjDgXx9UO0m3JQAaN4LS
-VpelUkl8YDib7wIDAQABo4HvMIHsMBIGA1UdEwEB/wQIMAYBAf8CAQAwHwYDVR0j
-BBgwFoAUK9BpR5R2Cf70a40uQKb3R01/CF4wRAYIKwYBBQUHAQEEODA2MDQGCCsG
-AQUFBzABhihodHRwOi8vb2NzcC5hcHBsZS5jb20vb2NzcDAzLWFwcGxlcm9vdGNh
-MC4GA1UdHwQnMCUwI6AhoB+GHWh0dHA6Ly9jcmwuYXBwbGUuY29tL3Jvb3QuY3Js
-MB0GA1UdDgQWBBQJ/sAVkPmvZAqSErkmKGMMl+ynsjAOBgNVHQ8BAf8EBAMCAQYw
-EAYKKoZIhvdjZAYCAQQCBQAwDQYJKoZIhvcNAQELBQADggEBAK1lE+j24IF3RAJH
-Qr5fpTkg6mKp/cWQyXMT1Z6b0KoPjY3L7QHPbChAW8dVJEH4/M/BtSPp3Ozxb8qA
-HXfCxGFJJWevD8o5Ja3T43rMMygNDi6hV0Bz+uZcrgZRKe3jhQxPYdwyFot30ETK
-XXIDMUacrptAGvr04NM++i+MZp+XxFRZ79JI9AeZSWBZGcfdlNHAwWx/eCHvDOs7
-bJmCS1JgOLU5gm3sUjFTvg+RTElJdI+mUcuER04ddSduvfnSXPN/wmwLCTbiZOTC
-NwMUGdXqapSqqdv+9poIZ4vvK7iqF0mDr8/LvOnP6pVxsLRFoszlh6oKw0E6eVza
-UDSdlTs=
+MIIEIjCCAwqgAwIBAgIIAd68xDltoBAwDQYJKoZIhvcNAQEFBQAwYjELMAkGA1UE
+BhMCVVMxEzARBgNVBAoTCkFwcGxlIEluYy4xJjAkBgNVBAsTHUFwcGxlIENlcnRp
+ZmljYXRpb24gQXV0aG9yaXR5MRYwFAYDVQQDEw1BcHBsZSBSb290IENBMB4XDTEz
+MDIwNzIxNDg0N1oXDTIzMDIwNzIxNDg0N1owgZYxCzAJBgNVBAYTAlVTMRMwEQYD
+VQQKDApBcHBsZSBJbmMuMSwwKgYDVQQLDCNBcHBsZSBXb3JsZHdpZGUgRGV2ZWxv
+cGVyIFJlbGF0aW9uczFEMEIGA1UEAww7QXBwbGUgV29ybGR3aWRlIERldmVsb3Bl
+ciBSZWxhdGlvbnMgQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwggEiMA0GCSqGSIb3
+DQEBAQUAA4IBDwAwggEKAoIBAQDKOFSmy1aqyCQ5SOmM7uxfuH8mkbw0U3rOfGOA
+YXdkXqUHI7Y5/lAtFVZYcC1+xG7BSoU+L/DehBqhV8mvexj/avoVEkkVCBmsqtsq
+Mu2WY2hSFT2Miuy/axiV4AOsAX2XBWfODoWVN2rtCbauZ81RZJ/GXNG8V25nNYB2
+NqSHgW44j9grFU57Jdhav06DwY3Sk9UacbVgnJ0zTlX5ElgMhrgWDcHld0WNUEi6
+Ky3klIXh6MSdxmilsKP8Z35wugJZS3dCkTm59c3hTO/AO0iMpuUhXf1qarunFjVg
+0uat80YpyejDi+l5wGphZxWy8P3laLxiX27Pmd3vG2P+kmWrAgMBAAGjgaYwgaMw
+HQYDVR0OBBYEFIgnFwmpthhgi+zruvZHWcVSVKO3MA8GA1UdEwEB/wQFMAMBAf8w
+HwYDVR0jBBgwFoAUK9BpR5R2Cf70a40uQKb3R01/CF4wLgYDVR0fBCcwJTAjoCGg
+H4YdaHR0cDovL2NybC5hcHBsZS5jb20vcm9vdC5jcmwwDgYDVR0PAQH/BAQDAgGG
+MBAGCiqGSIb3Y2QGAgEEAgUAMA0GCSqGSIb3DQEBBQUAA4IBAQBPz+9Zviz1smwv
+j+4ThzLoBTWobot9yWkMudkXvHcs1Gfi/ZptOllc34MBvbKuKmFysa/Nw0Uwj6OD
+Dc4dR7Txk4qjdJukw5hyhzs+r0ULklS5MruQGFNrCk4QttkdUGwhgAqJTleMa1s8
+Pab93vcNIx0LSiaHP7qRkkykGRIZbVf1eliHe2iK5IaMSuviSRSqpd1VAKmuu0sw
+ruGgsbwpgOYJd+W+NKIByn/c4grmO7i77LpilfMFY0GCzQ87HUyVpNur+cmV6U/k
+TecmmYHpvPm0KdIBembhLoz2IYrF+Hjhga6/05Cdqa3zr/04GpZnMBxRpVzscYqC
+tGwPDBUf
 -----END CERTIFICATE-----`,
 );
 
 /**
  * Signs a manifest and returns the signature.
  *
- * @param certificate - signing certificate
- * @param key - certificate password
- * @param manifest - manifest to sign
- * @returns signature for given manifest
+ * @param {import('node-forge').pki.Certificate} certificate - signing certificate
+ * @param {import('node-forge').pki.PrivateKey} key - certificate password
+ * @param {string} manifest - manifest to sign
+ * @returns {Buffer} - signature for given manifest
  */
 export function signManifest(
   certificate: forge.pki.Certificate,
   key: forge.pki.PrivateKey,
   manifest: string,
-): string {
+): Buffer {
+  // create PKCS#7 signed data
   const p7 = forge.pkcs7.createSignedData();
   p7.content = manifest;
   p7.addCertificate(certificate);
@@ -134,14 +172,25 @@ export function signManifest(
     certificate,
     digestAlgorithm: forge.pki.oids.sha1,
     authenticatedAttributes: [
-      { type: forge.pki.oids.contentType, value: forge.pki.oids.data },
-      { type: forge.pki.oids.messageDigest },
-      { type: forge.pki.oids.signingTime },
+      {
+        type: forge.pki.oids.contentType,
+        value: forge.pki.oids.data,
+      },
+      {
+        type: forge.pki.oids.messageDigest,
+        // value will be auto-populated at signing time
+      },
+      {
+        type: forge.pki.oids.signingTime,
+        // value will be auto-populated at signing time
+        // value: new Date('2050-01-01T00:00:00Z')
+      },
     ],
   });
-
+  /**
+   * Creating a detached signature because we don't need the signed content.
+   */
   p7.sign({ detached: true });
 
-  return forge.asn1.toDer(p7.toAsn1()).getBytes();
-  // return Buffer.from(forge.asn1.toDer(p7.toAsn1()).getBytes(), 'binary');
+  return Buffer.from(forge.asn1.toDer(p7.toAsn1()).getBytes(), 'binary');
 }

@@ -8,6 +8,9 @@ declare global {
 
   interface Env {
     USERS: KVNamespace;
+
+    PASSBOOK_CERT?: string;
+    PASSBOOK_PRIVATE_KEY?: string;
   }
 
   const env: Env;
