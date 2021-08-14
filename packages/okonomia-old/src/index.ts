@@ -23,7 +23,7 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
     );
 
   const zip = await generatePass(
-    'https://github.com/valtyr/okonomia/blob/master/templates/costco.pkpass?raw=true',
+    'https://github.com/valtyr/okonomia/blob/master/templates/okonomia.pkpass?raw=true',
     {
       organizationName: 'Ökonomía',
       backgroundColor: 'rgb(248,243,243)',

@@ -4,7 +4,7 @@ import * as forge from 'node-forge';
 import { Buffer } from 'buffer';
 
 // Template URL
-// 'https://github.com/valtyr/okonomia/blob/master/templates/costco.pkpass?raw=true'
+// 'https://github.com/valtyr/okonomia/blob/master/templates/okonomia.pkpass?raw=true'
 
 function hex(a: ArrayBuffer) {
   return [...new Uint8Array(a)]
