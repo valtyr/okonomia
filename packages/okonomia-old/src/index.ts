@@ -23,7 +23,7 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
     );
 
   const zip = await generatePass(
-    'https://github.com/valtyr/okonomia/blob/master/templates/meee.pktemplate?raw=true',
+    'https://github.com/valtyr/okonomia/blob/master/templates/ella.pktemplate?raw=true&test=false',
     {
       organizationName: 'Ökonomía',
       backgroundColor: 'rgb(248,243,243)',
@@ -47,7 +47,7 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
           {
             key: 'member',
             label: 'Nafn',
-            value: 'Sigurður Ingi Sigurðarson',
+            value: 'Elín Halla Kjartansdóttir',
             // changeMessage: 'Member name changed to %@.',
           },
         ],
@@ -74,7 +74,7 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
           },
         ],
       },
-      serialNumber: '6110757dcaa70',
+      serialNumber: '6110757dcaa7dfa0',
       formatVersion: 1,
       description: 'Membership card for Ökonomía',
       passTypeIdentifier: 'pass.skirteini.okonomia.hi.is',
