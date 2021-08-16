@@ -51,15 +51,14 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
             // changeMessage: 'Member name changed to %@.',
           },
         ],
-        secondaryFields: [
+        secondaryFields: [],
+        auxiliaryFields: [
           {
             key: 'membershipNumber',
             label: 'Meðlimsnúmer',
             value: '123456789123456789',
             // changeMessage: 'Changed to %@',
           },
-        ],
-        auxiliaryFields: [
           {
             key: 'memberSince',
             label: 'Gildistími',
@@ -80,6 +79,13 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
       description: 'Membership card for Ökonomía',
       passTypeIdentifier: 'pass.skirteini.okonomia.hi.is',
       teamIdentifier: 'L5TEPZ8S7Z',
+      barcodes: [
+        {
+          format: 'PKBarcodeFormatPDF417',
+          message: '6110757dcaa70',
+          messageEncoding: 'iso-8859-1',
+        },
+      ],
     },
     env.PASSBOOK_CERT,
     env.PASSBOOK_PRIVATE_KEY,
