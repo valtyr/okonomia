@@ -6,7 +6,7 @@ export class DurableObjectOperatorMock implements DurableObjectOperator {
 
   async get<T = unknown>(key: string): Promise<T>;
   async get<T = unknown>(keys: Array<string>): Promise<Map<string, T>>;
-  async get(keyOrKeys: string | Array<string>): Promise<any> {
+  async get(keyOrKeys: string | Array<string>): Promise<unknown> {
     if (typeof keyOrKeys === 'string') {
       return this.storage.get(keyOrKeys);
     }
@@ -39,7 +39,7 @@ export class DurableObjectOperatorMock implements DurableObjectOperator {
 
   async delete(key: string): Promise<boolean>;
   async delete(keys: Array<string>): Promise<number>;
-  async delete(keyOrKeys: string | Array<string>): Promise<any> {
+  async delete(keyOrKeys: string | Array<string>): Promise<unknown> {
     if (typeof keyOrKeys === 'string') {
       return this.storage.delete(keyOrKeys);
     }
@@ -48,6 +48,8 @@ export class DurableObjectOperatorMock implements DurableObjectOperator {
     keyOrKeys.forEach(key => {
       if (this.storage.delete(key)) nDeleted++;
     });
+
+    return nDeleted;
   }
 
   async deleteAll(): Promise<void> {

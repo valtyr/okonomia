@@ -2,8 +2,14 @@
   "name": "root",
   "private": true,
   "devDependencies": {
-    "lerna": "^4.0.0"
+    "lerna": "^4.0.0",
+    "ultra-runner": "^3.10.5"
   },
   "npmClient": "yarn",
-  "useWorkspaces": true
+  "useWorkspaces": true,
+  "scripts": {
+    "lint": "ultra -r lint",
+    "build": "ultra -r build",
+    "dev": "lerna run --stream dev"
+  }
 }

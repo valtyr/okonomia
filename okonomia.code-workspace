@@ -1,0 +1,17 @@
+{
+  "folders": [
+	{
+		"name": "✨ root",
+		"path": "."
+	},
+	{
+		"name": "🚀 @okonomia/web",
+		"path": "packages/web"
+	},
+	{
+		"name": "📦 @okonomia/worker",
+		"path": "packages/worker"
+	}
+],
+  "settings": {}
+}

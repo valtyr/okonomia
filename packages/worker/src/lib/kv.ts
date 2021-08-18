@@ -14,7 +14,7 @@ const getJSON = <T>(
   return raw && JSON.parse(raw);
 };
 
-const userKey = (id: string) => `USER:INFO:${id}`;
+const userKey = (id: string): string => `USER:INFO:${id}`;
 export const UserStore = (env: Env) => ({
   put: putJSON<User>(env.USERS, userKey),
   get: getJSON<User>(env.USERS, userKey),

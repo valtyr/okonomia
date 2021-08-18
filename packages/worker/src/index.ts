@@ -16,7 +16,6 @@ router.post('/user/create', createUser);
 
 // Test routes
 router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
-  console.log(env);
   if (!env.PASSBOOK_CERT || !env.PASSBOOK_PRIVATE_KEY)
     throw new Error(
       'PASSBOOK_CERT and PASSBOOK_PRIVATE_KEY should be provided as environment variables',
@@ -105,7 +104,7 @@ router.get('/', r => {
   const document = `
     <h3 style="font-family: monospace;">Ökonomía API 🐑</h3>
     <pre style="font-size: 10px;">${JSON.stringify(
-      cloudflareInfo,
+    cloudflareInfo,
       undefined,
       2,
     )}</pre>
