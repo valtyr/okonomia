@@ -22,7 +22,7 @@ kv_persist = true # Defaults to ./.mf/
 [env.staging]
 name = "okonomia-staging"
 vars = { ENVIRONMENT = "staging" }
-route = "dev.ok.slodi.is/api/*"
+routes = ["dev.ok.slodi.is/api/*"]
 kv_namespaces = [
   { binding = "USERS", id = "50128b9acd284fd0befc35f4f708df54" },
 ]
