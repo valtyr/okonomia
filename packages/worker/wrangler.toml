@@ -20,6 +20,7 @@ kv_persist = true # Defaults to ./.mf/
 
 
 [env.staging]
+workers_dev = true
 name = "okonomia-staging"
 vars = { ENVIRONMENT = "staging" }
 routes = ["dev.ok.slodi.is/api/*"]
@@ -28,6 +29,7 @@ kv_namespaces = [
 ]
 
 [env.production]
+workers_dev = false
 name = "okonomia-prod"
 vars = { ENVIRONMENT = "production" }
 routes = [
