@@ -1,10 +1,6 @@
-# This is a basic workflow to help you get started with Actions
+name: "@okonomia/worker"
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
   push:
     branches: [ master ]
   pull_request:
@@ -17,17 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: bahmutov/npm-install@v1
-      - run: lerna bootstrap
+      - uses: c-hive/gha-yarn-cache@v2
+        with:
+          directory: packages/worker
       - run: yarn lint
+        working-directory: packages/worker
       
   deploy:
     name: Deploy to staging
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: bahmutov/npm-install@v1
-      - run: lerna bootstrap
+      - uses: c-hive/gha-yarn-cache@v2
+        with:
+          directory: packages/worker
       - name: Wrangler deploy
         uses: cloudflare/wrangler-action@1.3.0
         with:
