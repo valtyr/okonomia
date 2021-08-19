@@ -18,9 +18,13 @@ main = "./index.mjs"
 [miniflare]
 kv_persist = true # Defaults to ./.mf/
 
+# [secrets]
+# PASSBOOK_CERT
+# PASSBOOK_PRIVATE_KEY
+
 
 [env.staging]
-workers_dev = true
+workers_dev = false
 name = "okonomia-staging"
 vars = { ENVIRONMENT = "staging" }
 routes = ["dev.ok.slodi.is/api/*"]

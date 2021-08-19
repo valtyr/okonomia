@@ -98,13 +98,13 @@ router.get('/zip', async (request: Request, env: AugmentedEnvironment) => {
 });
 
 // Index route
-router.get('/', r => {
+router.get('/', (r) => {
   const cloudflareInfo = (r as CloudflareRequest).cf || { time: new Date() };
 
   const document = `
     <h3 style="font-family: monospace;">Ökonomía API 🐑</h3>
     <pre style="font-size: 10px;">${JSON.stringify(
-    cloudflareInfo,
+      cloudflareInfo,
       undefined,
       2,
     )}</pre>
@@ -129,5 +129,9 @@ export default {
     } catch (e) {
       console.log(e);
     }
+    return new Response('500', {
+      status: 500,
+      statusText: 'Unexpected server error',
+    });
   },
 };
