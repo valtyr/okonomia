@@ -19,4 +19,17 @@ format = "modules"
 main = "./index.mjs"
 
 [miniflare]
-kv_persist = true # Defaults to ./.mf/do
+kv_persist = true # Defaults to ./.mf/
+
+
+[env.staging]
+name = "okonomia-staging"
+vars = { ENVIRONMENT = "staging" }
+route = "dev.ok.slodi.is/api/*"
+
+[env.production]
+name = "okonomia-prod"
+vars = { ENVIRONMENT = "production" }
+routes = [
+  "ok.slodi.is/api/*",
+]
