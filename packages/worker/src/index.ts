@@ -103,8 +103,13 @@ router.get('/', (r) => {
 
   const document = `
     <h3 style="font-family: monospace;">Ökonomía API 🐑</h3>
+
+    <img style="margin-bottom: 30px;" src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8c2hlZXB8ZW58MHx8MHx8&ixlib=rb-1.2.1&w=1000&q=80" alt="baaah" width="300" />
+
     <details>
-      <summary style="font-family: monospace; font-weight: 600;">CF request info</summary>
+      <summary style="font-family: monospace; font-weight: 600; cursor: pointer;">
+        CF request info
+      </summary>
       <pre style="font-size: 10px;">${JSON.stringify(
         cloudflareInfo,
         undefined,
