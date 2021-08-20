@@ -103,11 +103,14 @@ router.get('/', (r) => {
 
   const document = `
     <h3 style="font-family: monospace;">Ökonomía API 🐑</h3>
-    <pre style="font-size: 10px;">${JSON.stringify(
-      cloudflareInfo,
-      undefined,
-      2,
-    )}</pre>
+    <details>
+      <summary style="font-family: monospace; font-weight: 600;">CF request info</summary>
+      <pre style="font-size: 10px;">${JSON.stringify(
+        cloudflareInfo,
+        undefined,
+        2,
+      )}</pre>
+    </details>
   `;
 
   return new Response(document, {
