@@ -9,6 +9,9 @@ declare global {
   interface Env {
     USERS: KVNamespace;
 
+    __STATIC_CONTENT_MANIFEST: string | Record<string, string>;
+    __STATIC_CONTENT: KVNamespace;
+
     PASSBOOK_CERT?: string;
     PASSBOOK_PRIVATE_KEY?: string;
   }

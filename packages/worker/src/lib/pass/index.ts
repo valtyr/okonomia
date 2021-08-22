@@ -8,7 +8,7 @@ import { Buffer } from 'buffer';
 
 function hex(a: ArrayBuffer) {
   return [...new Uint8Array(a)]
-    .map(x => x.toString(16).padStart(2, '0'))
+    .map((x) => x.toString(16).padStart(2, '0'))
     .join('');
 }
 
@@ -23,17 +23,13 @@ function hex(a: ArrayBuffer) {
  * @returns the `.pkpass` file as a buffer
  */
 const generatePass = async (
-  templateUrl: string,
+  templateBuffer: ArrayBuffer,
   pass: PKPass,
   certificate: string,
   privateKey: string,
 ) => {
-  // Fetch the template file
-  const template = await fetch(templateUrl);
-  const blob = await template.arrayBuffer();
-
   // Open the template file as .zip
-  const zip = await JSZip.loadAsync(blob);
+  const zip = await JSZip.loadAsync(templateBuffer);
 
   // Remove the manifest, signature and pass.json files
   zip.remove('manifest.json');

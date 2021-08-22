@@ -1,5 +1,6 @@
 import { Router } from 'itty-router';
 import { Request as CloudflareRequest } from 'miniflare';
+import { fetchAsset } from './lib/assets';
 import { UserStore } from './lib/kv';
 import generatePass from './lib/pass';
 import { log } from './lib/sentry';
@@ -19,89 +20,86 @@ router.post('/user/create', createUser);
 router.get(
   '/zip',
   async (request: CloudflareRequest, env: AugmentedEnvironment) => {
-    try {
-      if (!env.PASSBOOK_CERT || !env.PASSBOOK_PRIVATE_KEY)
-        throw new Error(
-          'PASSBOOK_CERT and PASSBOOK_PRIVATE_KEY should be provided as environment variables',
-        );
+    if (!env.PASSBOOK_CERT || !env.PASSBOOK_PRIVATE_KEY)
+      throw new Error(
+        'PASSBOOK_CERT and PASSBOOK_PRIVATE_KEY should be provided as environment variables',
+      );
 
-      const zip = await generatePass(
-        'https://github.com/valtyr/okonomia/blob/master/templates/ella.pktemplate?raw=true&test=false',
-        {
-          organizationName: 'Ökonomía',
-          backgroundColor: 'rgb(248,243,243)',
-          foregroundColor: 'rgb(3,3,3)',
-          logoText: 'Ökonomía',
-          // locations: [
-          //   {
-          //     latitude: 33.947736800000001267108018510043621063232421875,
-          //     longitude: -84.143066000000004578396328724920749664306640625,
-          //     relevantText: 'Your local Costco',
-          //   },
-          // ],
-          // barcode: {
-          //   format: 'PKBarcodeFormatPDF417',
-          //   message: '123456789123456789',
-          //   messageEncoding: 'iso-8859-1',
-          //   altText: '123456789123456789',
-          // },
-          generic: {
-            primaryFields: [
-              {
-                key: 'member',
-                label: 'Nafn',
-                value: 'Elín Halla Kjartansdóttir',
-                // changeMessage: 'Member name changed to %@.',
-              },
-            ],
-            secondaryFields: [],
-            auxiliaryFields: [
-              {
-                key: 'membershipNumber',
-                label: 'Meðlimsnúmer',
-                value: '123456789123456789',
-                // changeMessage: 'Changed to %@',
-              },
-              {
-                key: 'memberSince',
-                label: 'Gildistími',
-                value: 'Ágúst 2020 - Júlí 2021',
-              },
-            ],
-            backFields: [
-              {
-                key: 'info',
-                label: 'Afslættir',
-                value:
-                  'Þetta kort veitir þér afslætti á drykkjum á eftirfarandi stöðum: \n • Sæta Svínið - 20% \n • Jólahúsið Akureyri - 20%',
-              },
-            ],
-          },
-          serialNumber: '6110757dcaa7dfa0',
-          formatVersion: 1,
-          description: 'Membership card for Ökonomía',
-          passTypeIdentifier: 'pass.skirteini.okonomia.hi.is',
-          teamIdentifier: 'L5TEPZ8S7Z',
-          barcodes: [
+    const template = await fetchAsset('meee.pktemplate', env);
+    const zip = await generatePass(
+      template,
+      {
+        organizationName: 'Ökonomía',
+        backgroundColor: 'rgb(248,243,243)',
+        foregroundColor: 'rgb(3,3,3)',
+        logoText: 'Ökonomía',
+        // locations: [
+        //   {
+        //     latitude: 33.947736800000001267108018510043621063232421875,
+        //     longitude: -84.143066000000004578396328724920749664306640625,
+        //     relevantText: 'Your local Costco',
+        //   },
+        // ],
+        // barcode: {
+        //   format: 'PKBarcodeFormatPDF417',
+        //   message: '123456789123456789',
+        //   messageEncoding: 'iso-8859-1',
+        //   altText: '123456789123456789',
+        // },
+        generic: {
+          primaryFields: [
             {
-              format: 'PKBarcodeFormatPDF417',
-              message: '6110757dcaa70',
-              messageEncoding: 'iso-8859-1',
+              key: 'member',
+              label: 'Nafn',
+              value: 'Elín Halla Kjartansdóttir',
+              // changeMessage: 'Member name changed to %@.',
+            },
+          ],
+          secondaryFields: [],
+          auxiliaryFields: [
+            {
+              key: 'membershipNumber',
+              label: 'Meðlimsnúmer',
+              value: '123456789123456789',
+              // changeMessage: 'Changed to %@',
+            },
+            {
+              key: 'memberSince',
+              label: 'Gildistími',
+              value: 'Ágúst 2020 - Júlí 2021',
+            },
+          ],
+          backFields: [
+            {
+              key: 'info',
+              label: 'Afslættir',
+              value:
+                'Þetta kort veitir þér afslætti á drykkjum á eftirfarandi stöðum: \n • Sæta Svínið - 20% \n • Jólahúsið Akureyri - 20%',
             },
           ],
         },
-        env.PASSBOOK_CERT,
-        env.PASSBOOK_PRIVATE_KEY,
-      );
-      return new Response(zip, {
-        headers: {
-          'Content-Type': 'application/vnd.apple.pkpass',
-          'Content-Disposition': 'attachment; filename="okonomia.pkpass"',
-        },
-      });
-    } catch (e) {
-      log(e as Error, request);
-    }
+        serialNumber: '6110757dcaa7dfa0',
+        formatVersion: 1,
+        description: 'Membership card for Ökonomía',
+        passTypeIdentifier: 'pass.skirteini.okonomia.hi.is',
+        teamIdentifier: 'L5TEPZ8S7Z',
+        barcodes: [
+          {
+            format: 'PKBarcodeFormatPDF417',
+            message: '6110757dcaa70',
+            messageEncoding: 'iso-8859-1',
+          },
+        ],
+      },
+      env.PASSBOOK_CERT,
+      env.PASSBOOK_PRIVATE_KEY,
+    );
+    return new Response(zip, {
+      headers: {
+        'Content-Type': 'application/vnd.apple.pkpass',
+        'Content-Disposition': 'attachment; filename="okonomia.pkpass"',
+      },
+    });
   },
 );
 
@@ -142,11 +140,8 @@ export default {
     try {
       return await router.handle(req, augmentedEnvironment);
     } catch (e) {
-      log(e as Error, req);
+      // log(e as Error, req);
+      throw e;
     }
-    return new Response('500', {
-      status: 500,
-      statusText: 'Unexpected server error',
-    });
   },
 };
