@@ -13,5 +13,9 @@ declare global {
     PASSBOOK_PRIVATE_KEY?: string;
   }
 
+  /**
+   * Git hash of current commit. Will be ambiguous in development.
+   */
+  const GIT_HASH: string;
   const env: Env;
 }
