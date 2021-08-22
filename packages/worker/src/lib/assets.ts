@@ -4,9 +4,8 @@ const parseStringAsObject = <T>(maybeString: string | T): T =>
     : maybeString;
 
 export async function fetchAsset(assetPath: string, env: Env) {
-  const siteAssetPath2KvKey = parseStringAsObject(
-    env.__STATIC_CONTENT_MANIFEST,
-  );
+  const siteAssetPath2KvKey =
+    parseStringAsObject(env.__STATIC_CONTENT_MANIFEST) || {};
   //   console.log(siteAssetPath2KvKey);
   //   console.log(await env.__STATIC_CONTENT.list());
   const pageKey = siteAssetPath2KvKey[assetPath] || assetPath;
