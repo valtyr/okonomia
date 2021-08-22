@@ -140,8 +140,10 @@ export default {
     try {
       return await router.handle(req, augmentedEnvironment);
     } catch (e) {
-      // log(e as Error, req);
-      throw e;
+      log(e as Error, req);
+      return new Response('Server error', {
+        status: 500,
+      });
     }
   },
 };
