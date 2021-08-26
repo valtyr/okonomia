@@ -10,13 +10,13 @@ export class DurableObjectOperatorMock implements DurableObjectOperator {
     if (typeof keyOrKeys === 'string') {
       return this.storage.get(keyOrKeys);
     }
-    const obj = keyOrKeys.reduce(
-      (prev, cur) => ({
-        ...prev,
-        ...(this.get(cur) ? { [cur]: this.get(cur) } : {}),
-      }),
-      {} as DurableObjectInnerStorage,
-    );
+    const promises = keyOrKeys.map(async (cur) => {
+      const key = await this.get(cur);
+      return {
+        ...(key ? { [cur]: key } : {}),
+      };
+    });
+    const obj = Promise.all(promises);
     return new Map(Object.entries(obj));
   }
 
@@ -45,7 +45,7 @@ export class DurableObjectOperatorMock implements DurableObjectOperator {
     }
 
     let nDeleted = 0;
-    keyOrKeys.forEach(key => {
+    keyOrKeys.forEach((key) => {
       if (this.storage.delete(key)) nDeleted++;
     });
 
@@ -90,15 +90,19 @@ export class DurableObjectOperatorMock implements DurableObjectOperator {
   }
 }
 
-export class DurableObjectTransactionMock extends DurableObjectOperatorMock
-  implements DurableObjectTransaction {
+export class DurableObjectTransactionMock
+  extends DurableObjectOperatorMock
+  implements DurableObjectTransaction
+{
   rollback() {
     throw new NotImplementedError('This method has not been implemented 🤠');
   }
 }
 
-export class DurableObjectStorageMock extends DurableObjectOperatorMock
-  implements DurableObjectStorage {
+export class DurableObjectStorageMock
+  extends DurableObjectOperatorMock
+  implements DurableObjectStorage
+{
   async transaction(
     _closure: (txn: DurableObjectTransaction) => Promise<void>,
   ): Promise<void> {
