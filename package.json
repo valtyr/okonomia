@@ -10,6 +10,7 @@
   "scripts": {
     "lint": "ultra -r lint",
     "build": "ultra -r build",
-    "dev": "lerna run --stream dev"
+    "dev": "lerna run --stream dev",
+    "ok": "./packages/scripts/bin/run"
   }
 }

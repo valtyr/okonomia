@@ -1,0 +1,1 @@
+./bin/run completion:generate --shell fish | tee ~/.config/fish/completions/ok.fish

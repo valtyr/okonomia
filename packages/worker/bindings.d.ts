@@ -8,6 +8,7 @@ declare global {
 
   interface Env {
     USERS: KVNamespace;
+    ASSETS: KVNamespace;
 
     __STATIC_CONTENT_MANIFEST: string | Record<string, string>;
     __STATIC_CONTENT: KVNamespace;

@@ -25,7 +25,7 @@ router.get(
         'PASSBOOK_CERT and PASSBOOK_PRIVATE_KEY should be provided as environment variables',
       );
 
-    const template = await fetchAsset('meee.pktemplate', env);
+    const template = await fetchAsset('assets/template.pkpass', env);
     const zip = await generatePass(
       template,
       {
@@ -128,6 +128,11 @@ router.get('/', (r) => {
   });
 });
 
+router.get(
+  '*',
+  () => new Response('404 Not found', { status: 404, statusText: 'Not found' }),
+);
+
 export default {
   async fetch(req: CloudflareRequest, env: Env) {
     const augmentedEnvironment: AugmentedEnvironment = {
@@ -137,13 +142,6 @@ export default {
       },
     };
 
-    try {
-      return await router.handle(req, augmentedEnvironment);
-    } catch (e) {
-      log(e as Error, req);
-      return new Response('Server error', {
-        status: 500,
-      });
-    }
+    return await router.handle(req, augmentedEnvironment);
   },
 };
