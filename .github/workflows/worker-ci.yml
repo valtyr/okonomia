@@ -50,5 +50,5 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: 'staging'
           workingDirectory: 'packages/worker'
-      - name: Update assets
-        run: yarn ok assets:sync -e staging --no-confirm
+          postCommands: |
+            yarn ok assets:sync -e staging --no-confirm
