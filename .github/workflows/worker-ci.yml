@@ -18,7 +18,9 @@ jobs:
           directory: packages/worker
 
       - name: Install JS dependencies
-        run: yarn install
+        run: lerna bootstrap
+          --include-dependents --include-dependencies
+          --scope @okonomia/worker
         working-directory: packages/worker
       - name: Lint
         run: yarn lint:eslint
