@@ -40,7 +40,9 @@ jobs:
         with:
           directory: packages/worker
       - name: Install JS dependencies
-        run: yarn install
+        run: lerna bootstrap
+          --include-dependents --include-dependencies
+          --scope @okonomia/worker
         working-directory: packages/worker
       - name: Wrangler deploy
         uses: cloudflare/wrangler-action@1.3.0
@@ -48,5 +50,5 @@ jobs:
           apiToken: ${{ secrets.CF_API_TOKEN }}
           environment: 'staging'
           workingDirectory: 'packages/worker'
-      - name: Update dependencies
+      - name: Update assets
         run: yarn ok assets:sync -e staging --no-confirm
