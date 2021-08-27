@@ -1,20 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env -S node --experimental-vm-modules
 
-set -euo pipefail
-
-SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )/ok"
-
-cd "$PWD"
-
-JS_SCRIPT="\
-  const fs = require('fs');\
-  const path = require('path');\
-  const realPath = fs.readlinkSync('$SCRIPT_PATH').replace('../../', '/');\
-  const normalized = fs.realpathSync(realPath);\
-  const dir = path.dirname(normalized);\
-  console.log(dir + '/run.js');\
-"
-
-EXECUTABLE="$(node -e  "$JS_SCRIPT")"
-
-node --experimental-vm-modules "$EXECUTABLE"
+require('@oclif/command')
+  .run()
+  .then(require('@oclif/command/flush'))
+  .catch(require('@oclif/errors/handle'));

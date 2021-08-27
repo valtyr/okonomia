@@ -12,7 +12,8 @@
     "lint": "yarn lint:typescript && yarn lint:eslint",
     "lint:typescript": "tsc --noemit",
     "lint:eslint": "eslint **/*.{ts,d.ts}",
-    "assets": "deno run --allow-run scripts/update-assets.ts"
+    "assets": "deno run --allow-run scripts/update-assets.ts",
+    "ok": "node --experimental-vm-modules ../scripts/bin/run"
   },
   "ultra": {
     "concurrent": [
