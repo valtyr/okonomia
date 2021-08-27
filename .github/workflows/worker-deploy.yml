@@ -1,0 +1,30 @@
+name: '@okonomia/worker'
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to production
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: c-hive/gha-yarn-cache@v2
+        with:
+          directory: packages/worker
+      - name: Install JS dependencies
+        run: lerna bootstrap
+          --include-dependents --include-dependencies
+          --scope @okonomia/worker
+        working-directory: packages/worker
+      - name: Wrangler deploy
+        uses: cloudflare/wrangler-action@1.3.0
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          environment: 'production'
+          workingDirectory: 'packages/worker'
+          postCommands: |
+            yarn ok assets:sync -e production --no-confirm

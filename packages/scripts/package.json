@@ -1,6 +1,6 @@
 {
   "name": "@okonomia/scripts",
-  "description": "> TODO: description",
+  "description": "Monorepo utilities for @okonomia",
   "version": "0.0.0",
   "author": "Valtýr Örn Kjartansson <valtyr@gmail.com>",
   "bin": {
