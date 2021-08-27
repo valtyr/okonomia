@@ -1,0 +1,52 @@
+name: '@okonomia/worker'
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: c-hive/gha-yarn-cache@v2
+        with:
+          directory: packages/worker
+
+      - name: Install JS dependencies
+        run: lerna bootstrap
+          --include-dependents --include-dependencies
+          --scope @okonomia/worker
+        working-directory: packages/worker
+      - name: Lint
+        run: yarn lint:eslint
+        working-directory: packages/worker
+      - name: Typecheck
+        run: yarn lint:typescript
+        working-directory: packages/worker
+
+  deploy:
+    name: Deploy to staging
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: c-hive/gha-yarn-cache@v2
+        with:
+          directory: packages/worker
+      - name: Install JS dependencies
+        run: lerna bootstrap
+          --include-dependents --include-dependencies
+          --scope @okonomia/worker
+        working-directory: packages/worker
+      - name: Wrangler deploy
+        uses: cloudflare/wrangler-action@1.3.0
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          environment: 'staging'
+          workingDirectory: 'packages/worker'
+          postCommands: |
+            yarn ok assets:sync -e staging --no-confirm

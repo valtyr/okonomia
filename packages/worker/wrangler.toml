@@ -10,9 +10,6 @@ zone_id = ""
 command = "yarn build"          ## --build-command
 watch_dir = "src"               ## --build-watch-path
 
-kv_namespaces = [
-  { binding = "USERS", id = "28a4069c157b4cbfa8299885e7bd3806" },
-]
 
 [build.upload]
 format = "modules"
@@ -21,15 +18,29 @@ main = "./index.mjs"
 [miniflare]
 kv_persist = true # Defaults to ./.mf/
 
+# [secrets]
+# PASSBOOK_CERT
+# PASSBOOK_PRIVATE_KEY
+
 
 [env.staging]
+workers_dev = true
 name = "okonomia-staging"
 vars = { ENVIRONMENT = "staging" }
-route = "dev.ok.slodi.is/api/*"
+# routes = ["dev.ok.slodi.is/api/*"]
+kv_namespaces = [
+  { binding = "USERS", id = "50128b9acd284fd0befc35f4f708df54" },
+  { binding = "ASSETS", id = "8b5a1638924440e586e673da9f8d0e1d" },
+]
 
 [env.production]
+workers_dev = false
 name = "okonomia-prod"
 vars = { ENVIRONMENT = "production" }
 routes = [
   "ok.slodi.is/api/*",
+]
+kv_namespaces = [
+  { binding = "USERS", id = "28a4069c157b4cbfa8299885e7bd3806" },
+  { binding = "ASSETS", id = "381c57fad1224e028b4ed7e907d30bbd" },
 ]
