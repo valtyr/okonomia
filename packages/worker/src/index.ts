@@ -128,6 +128,18 @@ router.get('/', (r) => {
   });
 });
 
+router.get('/authenticated', async (res: CloudflareRequest, env: Env) => {
+  const app = getFirebase(env);
+
+  const test = await app.auth().listUsers();
+
+  return new Response(JSON.stringify(test.users, undefined, 2), {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+});
+
 router.get(
   '*',
   () => new Response('404 Not found', { status: 404, statusText: 'Not found' }),
