@@ -38,7 +38,7 @@ workers_dev = false
 name = "okonomia-prod"
 vars = { ENVIRONMENT = "production" }
 routes = [
-  "ok.slodi.is/api/*",
+  "okonomia.club/api*",
 ]
 kv_namespaces = [
   { binding = "USERS", id = "28a4069c157b4cbfa8299885e7bd3806" },
