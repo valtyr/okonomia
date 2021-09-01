@@ -29,7 +29,7 @@ router.get(
         status: 401,
         statusText: 'Unauthorized',
         headers: {
-          'X-JWT-REASON': e.toString(),
+          'X-JWT-REASON': (e as any).toString(),
         },
       });
     }
@@ -171,18 +171,6 @@ router.get('/', async (r: CloudflareRequest) => {
 
   return new Response(document, {
     headers: { 'Content-Type': 'text/html; charset=utf-8' },
-  });
-});
-
-router.get('/authenticated', async (res: CloudflareRequest, env: Env) => {
-  const app = getFirebase(env);
-
-  const test = await app.auth().listUsers();
-
-  return new Response(JSON.stringify(test.users, undefined, 2), {
-    headers: {
-      'Content-Type': 'application/json',
-    },
   });
 });
 

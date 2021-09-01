@@ -77,11 +77,11 @@ const Signup: NextPage = () => {
   }
 
   if (signInError) {
-    return signInError;
+    return <div>{signInError}</div>;
   }
 
   if (linkSent) {
-    return 'Link sent';
+    return <div>Link sent</div>;
   }
 
   return (
