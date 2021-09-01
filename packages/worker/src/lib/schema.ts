@@ -8,6 +8,7 @@ export const User = z.object({
   isInEconomics: z.boolean(),
   imageKey: z.string(),
   hasPaid: z.boolean().default(false),
+  isAdmin: z.boolean().default(false),
 });
 export type User = z.infer<typeof User>;
 

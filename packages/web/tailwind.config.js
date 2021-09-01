@@ -19,6 +19,7 @@ module.exports = {
     fontFamily: {
       // sans: ['manrope', ...systemFontStack],
       sans: systemFontStack,
+      serif: 'Vollkorn',
     },
     extend: {},
   },

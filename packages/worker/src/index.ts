@@ -1,6 +1,8 @@
+import { JwtPayload } from '@cfworker/jwt';
 import { Router } from 'itty-router';
 import { Request as CloudflareRequest } from 'miniflare';
 import { fetchAsset } from './lib/assets';
+import { validateSession } from './lib/auth';
 import { UserStore } from './lib/kv';
 import generatePass from './lib/pass';
 import { log } from './lib/sentry';
@@ -15,6 +17,30 @@ export type AugmentedEnvironment = Env & {
 // User routes
 router.get('/users', allUsers);
 router.post('/user/create', createUser);
+
+router.get(
+  '/protected',
+  async (request: CloudflareRequest, env: AugmentedEnvironment) => {
+    let session: JwtPayload | null = null;
+    try {
+      session = await validateSession(request);
+    } catch (e) {
+      return new Response('Unauthorized', {
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: {
+          'X-JWT-REASON': e.toString(),
+        },
+      });
+    }
+
+    return new Response(JSON.stringify(session, undefined, 2), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  },
+);
 
 // Test routes
 router.get(
@@ -104,8 +130,14 @@ router.get(
 );
 
 // Index route
-router.get('/', (r) => {
+router.get('/', async (r: CloudflareRequest) => {
   const cloudflareInfo = (r as CloudflareRequest).cf || { time: new Date() };
+
+  let session: JwtPayload | null = null;
+  try {
+    session = await validateSession(r);
+    // eslint-disable-next-line no-empty
+  } catch (e) {}
 
   const document = `
     <h3 style="font-family: monospace;">Ökonomía API 🐑</h3>
@@ -121,6 +153,20 @@ router.get('/', (r) => {
         2,
       )}</pre>
     </details>
+    ${
+      session
+        ? `<details>
+      <summary style="font-family: monospace; font-weight: 600; cursor: pointer;">
+        Session info
+      </summary>
+      <pre style="font-size: 10px;">${JSON.stringify(
+        session,
+        undefined,
+        2,
+      )}</pre>
+    </details>`
+        : ''
+    }
   `;
 
   return new Response(document, {

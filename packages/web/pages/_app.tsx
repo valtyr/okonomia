@@ -2,6 +2,7 @@ import React from 'react';
 import 'tailwindcss/tailwind.css';
 import '../public/global.css';
 import { IdProvider } from '@radix-ui/react-id';
+import { AuthProvider } from '../lib/contexts/AuthContext';
 
 const App: React.FC<{
   Component: React.FC;
@@ -9,7 +10,9 @@ const App: React.FC<{
 }> = ({ Component, pageProps }) => {
   return (
     <IdProvider>
-      <Component {...pageProps} />
+      <AuthProvider>
+        <Component {...pageProps} />
+      </AuthProvider>
     </IdProvider>
   );
 };
