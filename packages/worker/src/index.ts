@@ -8,7 +8,9 @@ import generatePass from './lib/pass';
 import { log } from './lib/sentry';
 import { allUsers, createUser } from './routes/user';
 
-const router = Router();
+const router = Router({
+  base: '/api',
+});
 
 export type AugmentedEnvironment = Env & {
   kv: { users: ReturnType<typeof UserStore> };
@@ -188,6 +190,20 @@ export default {
       },
     };
 
-    return await router.handle(req, augmentedEnvironment);
+    try {
+      return await router.handle(req, augmentedEnvironment);
+    } catch (e) {
+      if (env.ENVIRONMENT === 'dev') {
+        throw e;
+      }
+
+      // Log error
+      log(e, req);
+
+      return new Response('Unexpected error', {
+        status: 500,
+        statusText: 'Server error',
+      });
+    }
   },
 };
