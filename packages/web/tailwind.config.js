@@ -17,8 +17,9 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     fontFamily: {
-      // sans: ['Epilogue', ...systemFontStack],
+      // sans: ['manrope', ...systemFontStack],
       sans: systemFontStack,
+      serif: 'Vollkorn',
     },
     extend: {},
   },

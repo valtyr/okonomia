@@ -9,6 +9,7 @@ export const createUser: APIRequestHandler = async (request, env) => {
   const newUser = {
     ...data,
     hasPaid: false,
+    isAdmin: false,
     id: nanoid(),
   };
 

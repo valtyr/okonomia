@@ -6,14 +6,20 @@ import assertUnreachable from '../lib/assertUnreachable';
 import classNames from '../lib/classNames';
 import FocusRing from './FocusRing';
 
-type ButtonStyle = 'primary' | 'secondary';
+type ButtonStyle = 'primary' | 'secondary' | 'accent';
 
 const classNamesForButtonStyle = (style: ButtonStyle) => {
   switch (style) {
     case 'primary':
-      return 'bg-black text-white';
+      return `border border-black bg-black text-white
+              hover:text-black hover:bg-transparent
+              transition-all transition-gpu`;
+    case 'accent':
+      return `border border-blue-600 bg-blue-600 text-white
+              hover:text-blue-600 hover:bg-transparent
+              transition-all transition-gpu`;
     case 'secondary':
-      return 'border-2 border-gray-300';
+      return 'border border-gray-200 hover:shadow-sm';
     default:
       assertUnreachable(style);
   }
@@ -35,7 +41,10 @@ const Button: React.FC<
         className={classNames(
           'rounded-lg px-10 py-2 flex items-center justify-center',
           'appearance-none outline-none',
-          classNamesForButtonStyle(buttonStyle),
+          classNamesForButtonStyle(
+            props.isDisabled ? 'secondary' : buttonStyle,
+          ),
+          props.isDisabled && 'opacity-60 cursor-not-allowed',
         )}
         ref={ref}
       >

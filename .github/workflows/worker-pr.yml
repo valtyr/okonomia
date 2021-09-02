@@ -41,7 +41,7 @@ jobs:
         run: lerna bootstrap
           --include-dependents --include-dependencies
           --scope @okonomia/worker
-        working-directory: packages/worker
+          --scope @okonomia/scripts
       - name: Wrangler deploy
         uses: cloudflare/wrangler-action@1.3.0
         with:
