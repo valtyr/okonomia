@@ -37,6 +37,7 @@ kv_namespaces = [
 workers_dev = false
 name = "okonomia-prod"
 vars = { ENVIRONMENT = "production" }
+zone_id = "7e2f351670c0d0ea67d2bb8737ec88a1"
 routes = [
   "okonomia.club/api*",
 ]
