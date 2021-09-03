@@ -198,7 +198,8 @@ export default {
       }
 
       // Log error
-      log(e, req);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      log(e as any, req);
 
       return new Response('Unexpected error', {
         status: 500,
