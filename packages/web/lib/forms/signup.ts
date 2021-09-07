@@ -1,5 +1,10 @@
 import { useField, useForm } from '@shopify/react-form';
-import { requiredField, validEmail, validKennitala } from './validation';
+import {
+  max4MBFile,
+  requiredField,
+  validEmail,
+  validKennitala,
+} from './validation';
 import { getAuth, sendSignInLinkToEmail } from '../firebase';
 import { YearValue } from '../../components/YearInput';
 import { useUploadDPMutation } from '../uploadDP';
@@ -33,7 +38,7 @@ const useSignupForm = () => {
       }),
       dp: useField<File | null>({
         value: null,
-        validates: [requiredField],
+        validates: [requiredField, max4MBFile],
       }),
       isInEconomics: useField(true),
       year: useField<YearValue>(YearValue.First),

@@ -23,3 +23,10 @@ export const validKennitala: ValidationFunction<string> = (value) => {
   if (!kennitala.isPerson(value)) return 'Þetta er fyrirtækjakennitala';
   return;
 };
+
+export const max4MBFile: ValidationFunction<File | null> = (f) => {
+  if (!f) return;
+  const valid = f.size < 4 * 1024 * 1024;
+  if (!valid) return 'Myndin má vera 4MB að hámarki';
+  return;
+};

@@ -41,7 +41,7 @@ if (!getApps().length) {
 
     setCookie(null, TOKEN_COOKIE_KEY, await user.getIdToken(), {
       maxAge: 30 * 24 * 60 * 60,
-      path: '/',
+      path: '/users',
     });
   });
 }
