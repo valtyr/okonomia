@@ -10,6 +10,7 @@ const App: React.FC<{
   Component: React.FC;
   pageProps: any;
 }> = ({ Component, pageProps }) => {
+  // Wrap with providers
   return (
     <IdProvider>
       <AuthProvider>
