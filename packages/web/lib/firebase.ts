@@ -38,7 +38,6 @@ if (!getApps().length) {
       destroyCookie(null, TOKEN_COOKIE_KEY);
       return;
     }
-    console.log('Got user');
 
     setCookie(null, TOKEN_COOKIE_KEY, await user.getIdToken(), {
       maxAge: 30 * 24 * 60 * 60,

@@ -8,7 +8,7 @@
     "test": "yarn build && ava **/*.spec.ts  **/**/*.spec.ts",
     "format": "prettier --write '**/*.{js,css,json,md}'",
     "build": "esbuild src/index.ts --format=esm --bundle --define:GIT_HASH=\\\"$(git rev-parse HEAD)\\\" --sourcemap --outfile=dist/index.mjs",
-    "dev": "miniflare --watch --debug --kv USERS --kv ASSETS --site ./assets",
+    "dev": "miniflare --watch --debug --kv USERS --kv ASSETS --kv BUCKET --do USER_WATCHER=UserWatcher",
     "lint": "yarn lint:typescript && yarn lint:eslint",
     "lint:typescript": "tsc --noemit",
     "lint:eslint": "eslint **/*.{ts,d.ts}",

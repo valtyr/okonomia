@@ -1,6 +1,5 @@
 import { parseJwt, importKey, JsonWebKeyset } from '@cfworker/jwt';
-import { parse as parseCookie, stringify } from 'worktop/cookie';
-import { Request } from 'miniflare';
+import { parse as parseCookie } from 'worktop/cookie';
 
 const GOOGLE_JWK_URL =
   'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com';

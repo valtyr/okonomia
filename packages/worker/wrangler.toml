@@ -31,6 +31,7 @@ vars = { ENVIRONMENT = "staging" }
 kv_namespaces = [
   { binding = "USERS", id = "50128b9acd284fd0befc35f4f708df54" },
   { binding = "ASSETS", id = "8b5a1638924440e586e673da9f8d0e1d" },
+  { binding = "BUCKET", id = "b4316205bd67496a8343eea5b96d893a" },
 ]
 
 [env.production]
@@ -44,4 +45,8 @@ routes = [
 kv_namespaces = [
   { binding = "USERS", id = "28a4069c157b4cbfa8299885e7bd3806" },
   { binding = "ASSETS", id = "381c57fad1224e028b4ed7e907d30bbd" },
+  { binding = "BUCKET", id = "7717c4835de148dd8b707476a8acb4e9" },
 ]
+
+[durable_objects]
+bindings = [{name = "USER_WATCHER", class_name = "UserWatcher"}]

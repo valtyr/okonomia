@@ -12,9 +12,16 @@ const getJSON =
     return raw && JSON.parse(raw);
   };
 
+const deleteKey =
+  (ns: KVNamespace, keyFunction: (id: string) => string) =>
+  async (id: string): Promise<void> => {
+    await ns.delete(keyFunction(id));
+  };
+
 const userKey = (id: string): string => `USER:INFO:${id}`;
 export const UserStore = (env: Env) => ({
   put: putJSON<User>(env.USERS, userKey),
   get: getJSON<User>(env.USERS, userKey),
   list: env.USERS.list,
+  delete: deleteKey(env.USERS, userKey),
 });

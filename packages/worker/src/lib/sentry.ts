@@ -1,5 +1,3 @@
-import { Request } from 'miniflare';
-
 // Get the key from the "DSN" at: https://sentry.io/settings/<org>/projects/<project>/keys/
 // The "DSN" will be in the form: https://<SENTRY_KEY>@sentry.io/<SENTRY_PROJECT_ID>
 
