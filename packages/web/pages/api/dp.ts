@@ -45,13 +45,11 @@ const uploadRoute = async (req: NextApiRequest, res: NextApiResponse) => {
     concat.set(new Uint8Array(png), 0);
     concat.set(new Uint8Array(jpeg), png.byteLength);
 
-    if (!process.env.NEXT_PUBLIC_URL_BASE && !process.env.VERCEL_URL) {
-      throw new Error('NEXT_PUBLIC_URL_BASE not set!');
+    if (!process.env.API_URL) {
+      throw new Error('API_URL not set!');
     }
 
-    const path = process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}/api/dp/upload`
-      : `${process.env.NEXT_PUBLIC_URL_BASE}/api/dp/upload`;
+    const path = `${process.env.API_URL}/dp/upload`;
 
     const cfResponse = await fetch(path, {
       body: concat,

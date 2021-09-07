@@ -34,6 +34,10 @@ kv_namespaces = [
   { binding = "BUCKET", id = "b4316205bd67496a8343eea5b96d893a" },
 ]
 
+[env.staging.durable_objects]
+bindings = [{name = "USER_WATCHER", class_name = "UserWatcher"}]
+
+
 [env.production]
 workers_dev = false
 name = "okonomia-prod"
@@ -48,5 +52,5 @@ kv_namespaces = [
   { binding = "BUCKET", id = "7717c4835de148dd8b707476a8acb4e9" },
 ]
 
-[durable_objects]
+[env.production.durable_objects]
 bindings = [{name = "USER_WATCHER", class_name = "UserWatcher"}]

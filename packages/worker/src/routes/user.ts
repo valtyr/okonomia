@@ -56,7 +56,7 @@ export const watchUsers: APIRequestHandler = async (request, env) => {
   //   });
   // }
 
-  const id = env.USER_WATCHER.idFromString('okonomia');
+  const id = env.USER_WATCHER.idFromName('okonomia');
   const watcherObject = env.USER_WATCHER.get(id);
   const newURL = new URL(request.url);
   newURL.pathname = '/websocket';

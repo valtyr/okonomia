@@ -111,6 +111,7 @@ export default {
       // Log error
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       log(e as any, req);
+      console.error(`ENV: ${JSON.stringify(Object.keys(env))}`);
 
       return new Response('Unexpected error', {
         status: 500,
