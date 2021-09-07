@@ -39,8 +39,6 @@ export const createUser: APIRequestHandler = async (request, env) => {
 
   const user = await env.kv.users.put(newUser.id, newUser);
 
-  await pingWatcher(request, env);
-
   return APIResponse({
     data: { user },
   });
@@ -79,8 +77,6 @@ export const deleteUser: APIRequestHandler = async (request, env) => {
 
   await env.kv.users.delete(id);
 
-  await pingWatcher(request, env);
-
   return APIResponse({
     data: {
       success: true,
@@ -109,8 +105,6 @@ export const promoteUserToAdmin: APIRequestHandler = async (request, env) => {
     isAdmin: true,
   };
   await UserStore(env).put(id, updatedUser);
-
-  await pingWatcher(request, env);
 
   return APIResponse({
     data: {
@@ -141,8 +135,6 @@ export const demoteUserToMember: APIRequestHandler = async (request, env) => {
   };
   await UserStore(env).put(id, updatedUser);
 
-  await pingWatcher(request, env);
-
   return APIResponse({
     data: {
       user,
@@ -165,7 +157,10 @@ export const allUsers: APIRequestHandler = async (request, env) => {
     const userJSON = await env.USERS.get(key.name);
     return userJSON && JSON.parse(userJSON);
   });
-  const users = await Promise.all(userPromises);
+  // Filter out possible null values to be safe
+  const users = (await Promise.all(userPromises)).filter((user) =>
+    Boolean(user),
+  );
 
   return APIResponse({
     data: { users },

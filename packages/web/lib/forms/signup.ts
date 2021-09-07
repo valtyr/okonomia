@@ -77,9 +77,9 @@ const useSignupForm = () => {
         imageKey,
       });
 
-      router.push('/signup/success', {
-        query: { a: isInEconomics && year !== 'first' },
-      });
+      router.push(
+        `/signup/success${isInEconomics && year !== 'first' ? '?a' : ''}`,
+      );
 
       return { status: 'success' };
     },
