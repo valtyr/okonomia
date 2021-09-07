@@ -9,7 +9,7 @@ import { imageKey } from './images';
 import { AugmentedEnvironment } from '..';
 
 const pingWatcher = async (request: Request, env: AugmentedEnvironment) => {
-  const id = env.USER_WATCHER.idFromString('okonomia');
+  const id = env.USER_WATCHER.idFromName('okonomia');
   const watcherObject = env.USER_WATCHER.get(id);
   const newURL = new URL(request.url);
   newURL.pathname = '/update';
