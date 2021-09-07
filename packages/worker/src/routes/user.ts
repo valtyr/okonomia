@@ -18,15 +18,6 @@ const pingWatcher = async (request: Request, env: AugmentedEnvironment) => {
 };
 
 export const createUser: APIRequestHandler = async (request, env) => {
-  try {
-    await validateSession(request);
-  } catch {
-    return new Response('Unauthorized', {
-      status: 401,
-      statusText: 'Unauthorized',
-    });
-  }
-
   const input = await request.json();
   const data = CreateUserInput.parse(input);
 
