@@ -28,7 +28,7 @@ export const createUser: APIRequestHandler = async (request, env) => {
     id: nanoid(),
   };
 
-  if (env.kv.users.getEmailKey(newUser.email))
+  if (await env.kv.users.getEmailKey(newUser.email))
     return new Response(
       JSON.stringify({
         error: { message: 'Netfang er nú þegar í notkun', field: ['email'] },

@@ -41,7 +41,7 @@ export const UserStore = (env: Env) => ({
     await env.USERS.put(userEmailKey(email), id);
   },
   getEmailKey: async (email: string) => {
-    await env.USERS.get(userEmailKey(email));
+    return await env.USERS.get(userEmailKey(email));
   },
   deleteEmailKey: async (email: string) => {
     await env.USERS.delete(userEmailKey(email));
