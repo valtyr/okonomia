@@ -4,7 +4,10 @@ import formidable from 'formidable';
 
 const getFiles = (req: NextApiRequest): Promise<formidable.Files> =>
   new Promise((resolve, reject) => {
-    const form = formidable({ multiples: false });
+    const form = formidable({
+      multiples: false,
+      maxFileSize: 10 * 1024 * 1024,
+    });
 
     form.parse(req, (err, _fields, files) => {
       if (err) reject(err);

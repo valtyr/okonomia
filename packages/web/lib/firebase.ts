@@ -41,7 +41,7 @@ if (!getApps().length) {
 
     setCookie(null, TOKEN_COOKIE_KEY, await user.getIdToken(), {
       maxAge: 30 * 24 * 60 * 60,
-      path: '/users',
+      // path: '/users',
     });
   });
 }
@@ -72,7 +72,7 @@ export const useSignInWithEmailLink = () => {
         } catch (e) {
           setError(e.toString());
         }
-        router.push('/');
+        router.push('/users');
       })();
     }
   }, [router]);
