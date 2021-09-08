@@ -1,9 +1,7 @@
 import { JwtPayload } from '@cfworker/jwt';
 import { Router } from 'itty-router';
-import { fetchAsset } from './lib/assets';
 import { validateSession } from './lib/auth';
 import { UserStore } from './lib/kv';
-import generatePass from './lib/pass';
 import { log } from './lib/sentry';
 import { getJpeg, getPng, uploadImage } from './routes/images';
 import {
@@ -13,6 +11,7 @@ import {
   demoteUserToMember,
   idForUser,
   promoteUserToAdmin,
+  setHasPaid,
   watchUsers,
 } from './routes/user';
 
@@ -35,6 +34,7 @@ router.post('/user/create', createUser);
 router.delete('/user/:id', deleteUser);
 router.put('/user/:id/admin', promoteUserToAdmin);
 router.delete('/user/:id/admin', demoteUserToMember);
+router.post('/user/:id/payment', setHasPaid);
 router.get('/user/pass/:id', idForUser);
 
 // Image routes
@@ -43,12 +43,12 @@ router.get('/dp/:id', getJpeg);
 router.get('/dp/png/:id', getPng);
 
 // Index route
-router.get('/', async (r: Request) => {
+router.get('/', async (r: Request, env: AugmentedEnvironment) => {
   const cloudflareInfo = (r as Request).cf || { time: new Date() };
 
   let session: JwtPayload | null = null;
   try {
-    session = await validateSession(r);
+    session = await validateSession(r, env, false);
     // eslint-disable-next-line no-empty
   } catch (e) {}
 

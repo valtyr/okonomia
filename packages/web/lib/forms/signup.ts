@@ -72,7 +72,7 @@ const useSignupForm = () => {
       }
 
       // Create user in Worker
-      await createUserMutation.mutateAsync({
+      const { error } = await createUserMutation.mutateAsync({
         name,
         email,
         phone,
@@ -81,6 +81,8 @@ const useSignupForm = () => {
         year,
         imageKey,
       });
+
+      if (error) return { status: 'fail', errors: [error] };
 
       router.push(
         `/signup/success${isInEconomics && year !== 'first' ? '?a' : ''}`,

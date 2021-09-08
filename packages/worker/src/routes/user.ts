@@ -2,7 +2,7 @@ import { nanoid } from 'nanoid';
 import { fetchAsset } from '../lib/assets';
 import { validateSession } from '../lib/auth';
 import { UserStore } from '../lib/kv';
-import { API400, APIRequestHandler, APIResponse } from '../lib/route';
+import { API400, API404, APIRequestHandler, APIResponse } from '../lib/route';
 import { CreateUserInput } from '../lib/schema';
 import generatePass from '../lib/pass';
 import { imageKey } from './images';
@@ -28,7 +28,20 @@ export const createUser: APIRequestHandler = async (request, env) => {
     id: nanoid(),
   };
 
+  if (env.kv.users.getEmailKey(newUser.email))
+    return new Response(
+      JSON.stringify({
+        error: { message: 'Netfang er nú þegar í notkun', field: ['email'] },
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    );
+
   const user = await env.kv.users.put(newUser.id, newUser);
+  await env.kv.users.setEmailKey(newUser.id, newUser.email);
 
   return APIResponse({
     data: { user },
@@ -55,18 +68,26 @@ export const watchUsers: APIRequestHandler = async (request, env) => {
 
 export const deleteUser: APIRequestHandler = async (request, env) => {
   try {
-    await validateSession(request);
-  } catch {
+    await validateSession(request, env);
+  } catch (e) {
     return new Response('Unauthorized', {
       status: 401,
       statusText: 'Unauthorized',
+      headers: {
+        'X-Reason': e,
+      },
     });
   }
 
   const id = request.params?.id;
   if (!id) return API400();
 
+  const user = await env.kv.users.get(id);
+
+  if (!user) return API404();
+
   await env.kv.users.delete(id);
+  await env.kv.users.deleteEmailKey(user.email);
 
   return APIResponse({
     data: {
@@ -77,11 +98,14 @@ export const deleteUser: APIRequestHandler = async (request, env) => {
 
 export const promoteUserToAdmin: APIRequestHandler = async (request, env) => {
   try {
-    await validateSession(request);
-  } catch {
+    await validateSession(request, env);
+  } catch (e) {
     return new Response('Unauthorized', {
       status: 401,
       statusText: 'Unauthorized',
+      headers: {
+        'X-Reason': e,
+      },
     });
   }
 
@@ -96,6 +120,7 @@ export const promoteUserToAdmin: APIRequestHandler = async (request, env) => {
     isAdmin: true,
   };
   await UserStore(env).put(id, updatedUser);
+  await UserStore(env).setIsAdmin(id);
 
   return APIResponse({
     data: {
@@ -106,11 +131,14 @@ export const promoteUserToAdmin: APIRequestHandler = async (request, env) => {
 
 export const demoteUserToMember: APIRequestHandler = async (request, env) => {
   try {
-    await validateSession(request);
-  } catch {
+    await validateSession(request, env);
+  } catch (e) {
     return new Response('Unauthorized', {
       status: 401,
       statusText: 'Unauthorized',
+      headers: {
+        'X-Reason': e,
+      },
     });
   }
 
@@ -125,6 +153,43 @@ export const demoteUserToMember: APIRequestHandler = async (request, env) => {
     isAdmin: false,
   };
   await UserStore(env).put(id, updatedUser);
+  await UserStore(env).unsetIsAdmin(id);
+
+  return APIResponse({
+    data: {
+      user,
+    },
+  });
+};
+
+export const setHasPaid: APIRequestHandler = async (request, env) => {
+  try {
+    await validateSession(request, env);
+  } catch (e) {
+    return new Response('Unauthorized', {
+      status: 401,
+      statusText: 'Unauthorized',
+      headers: {
+        'X-Reason': e,
+      },
+    });
+  }
+
+  const id = request.params?.id;
+  if (!id) return API400();
+
+  const user = await UserStore(env).get(id);
+  if (!user) return API404();
+
+  const input = await request.json();
+  if (input['hasPaid'] == null || typeof input['hasPaid'] !== 'boolean')
+    return API400();
+
+  const updatedUser = {
+    ...user,
+    hasPaid: input['hasPaid'],
+  };
+  await UserStore(env).put(id, updatedUser);
 
   return APIResponse({
     data: {
@@ -135,11 +200,14 @@ export const demoteUserToMember: APIRequestHandler = async (request, env) => {
 
 export const allUsers: APIRequestHandler = async (request, env) => {
   try {
-    await validateSession(request);
-  } catch {
+    await validateSession(request, env);
+  } catch (e) {
     return new Response('Unauthorized', {
       status: 401,
       statusText: 'Unauthorized',
+      headers: {
+        'X-Reason': e,
+      },
     });
   }
 

@@ -8,6 +8,7 @@ import {
   CaretDownIcon,
   CaretSortIcon,
   CaretUpIcon,
+  CheckIcon,
   DotFilledIcon,
   DotsVerticalIcon,
   IdCardIcon,
@@ -29,6 +30,7 @@ import Input from './Input';
 import {
   DropdownMenu,
   DropdownMenuArrow,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuItemIndicator,
@@ -44,8 +46,10 @@ import {
   useDemoteToMemberMutation,
   usePromoteToAdminMutation,
   User,
+  useSetHasPaidMutation,
 } from '../lib/queries';
 import AlertDialog from './Alert';
+import { KeyIcon, MoneyIcon } from './Icons';
 
 const TH: React.FC<React.HTMLProps<HTMLTableHeaderCellElement>> = ({
   children,
@@ -121,6 +125,7 @@ const TableActions: React.FC<{ value: User }> = ({ value }) => {
   const deleteUser = useDeleteUserMutation();
   const promoteToAdmin = usePromoteToAdminMutation();
   const demoteToMember = useDemoteToMemberMutation();
+  const setHasPaid = useSetHasPaidMutation();
   const [alertOpen, setAlertOpen] = useState(false);
 
   return (
@@ -173,6 +178,21 @@ const TableActions: React.FC<{ value: User }> = ({ value }) => {
             </RightSlot>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
+          <DropdownMenuCheckboxItem
+            checked={value.hasPaid}
+            onCheckedChange={(v) =>
+              setHasPaid.mutate({ id: value.id, hasPaid: v })
+            }
+          >
+            <DropdownMenuItemIndicator>
+              <CheckIcon />
+            </DropdownMenuItemIndicator>
+            Greiðsla móttekin
+            <RightSlot>
+              <MoneyIcon />
+            </RightSlot>
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuSeparator />
           <DropdownMenuRadioGroup
             value={value.isAdmin ? 'admin' : 'member'}
             onValueChange={(role) => {
@@ -195,7 +215,7 @@ const TableActions: React.FC<{ value: User }> = ({ value }) => {
               </DropdownMenuItemIndicator>
               Sjórnandi
               <RightSlot>
-                <MagicWandIcon />
+                <KeyIcon />
               </RightSlot>
             </DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>

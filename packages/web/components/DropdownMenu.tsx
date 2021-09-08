@@ -46,6 +46,12 @@ export const DropdownMenuRadioItem: React.FC<
   <DropdownMenuPrimitive.RadioItem className={styles.item} {...props} />
 );
 
+export const DropdownMenuCheckboxItem: React.FC<
+  Parameters<typeof DropdownMenuPrimitive.CheckboxItem>[0]
+> = (props) => (
+  <DropdownMenuPrimitive.CheckboxItem className={styles.item} {...props} />
+);
+
 export const DropdownMenuItemIndicator: React.FC<
   Parameters<typeof DropdownMenuPrimitive.ItemIndicator>[0]
 > = (props) => (

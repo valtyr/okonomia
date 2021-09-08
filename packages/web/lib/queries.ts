@@ -114,9 +114,44 @@ export const useDeleteUserMutation = () =>
     },
   );
 
+export const useSetHasPaidMutation = () =>
+  useMutation(
+    ({ id, hasPaid }: { id: string; hasPaid: boolean }) =>
+      fetch(`/api/user/${id}/payment`, {
+        method: 'POST',
+        body: JSON.stringify({ hasPaid }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    {
+      onMutate: async ({ id, hasPaid }: { id: string; hasPaid: boolean }) => {
+        await queryClient.cancelQueries('users');
+        const previousUsers = await queryClient.getQueryData<UsersResponse>(
+          'users',
+        );
+        queryClient.setQueryData<UsersResponse>('users', (old) => ({
+          users:
+            old?.users.map((user) => {
+              if (user.id !== id) return user;
+              return { ...user, hasPaid };
+            }) || [],
+        }));
+        return { previousUsers };
+      },
+      onError: (err, newTodo, context) => {
+        if (context?.previousUsers)
+          queryClient.setQueryData('users', context.previousUsers);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries('users');
+      },
+    },
+  );
+
 export const useCreateUserMutation = () =>
   useMutation(
-    (body: {
+    async (body: {
       name: string;
       phone: string;
       kennitala: string;
@@ -124,12 +159,25 @@ export const useCreateUserMutation = () =>
       isInEconomics: boolean;
       imageKey: string;
       year: 'first' | 'second' | 'third' | 'other';
-    }) =>
-      fetch('/api/user/create', {
+    }) => {
+      const res = await fetch('/api/user/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(body),
-      }),
+      });
+
+      const responseBody = await res.json();
+
+      if (!res.ok) {
+        throw new Error('Villa kom upp!');
+      }
+
+      if (responseBody.error) {
+        return { error: responseBody.error };
+      }
+
+      return { data: responseBody };
+    },
   );
