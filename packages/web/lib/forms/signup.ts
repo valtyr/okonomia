@@ -1,8 +1,23 @@
 import { useField, useForm } from '@shopify/react-form';
-import { requiredField, validEmail } from './validation';
+import {
+  max4MBFile,
+  requiredField,
+  validEmail,
+  validKennitala,
+} from './validation';
 import { getAuth, sendSignInLinkToEmail } from '../firebase';
+import { YearValue } from '../../components/YearInput';
+import { useUploadDPMutation } from '../uploadDP';
+import { useCreateUserMutation } from '../queries';
+import { useRouter } from 'next/dist/client/router';
+
+import kt from 'kennitala';
 
 const useSignupForm = () => {
+  const router = useRouter();
+  const uploadDPMutation = useUploadDPMutation();
+  const createUserMutation = useCreateUserMutation();
+
   return useForm({
     fields: {
       name: useField({
@@ -17,16 +32,62 @@ const useSignupForm = () => {
         value: '',
         validates: [requiredField],
       }),
+      kennitala: useField({
+        value: '',
+        validates: [requiredField, validKennitala],
+      }),
+      dp: useField<File | null>({
+        value: null,
+        validates: [requiredField, max4MBFile],
+      }),
       isInEconomics: useField(true),
+      year: useField<YearValue>(YearValue.First),
     },
-    onSubmit: async ({ name, email }) => {
-      const auth = getAuth();
+    onSubmit: async ({
+      name,
+      email,
+      phone,
+      isInEconomics,
+      kennitala,
+      year,
+      dp,
+    }) => {
+      // const auth = getAuth();
 
-      console.log(`${location.protocol}//${location.host}/emailLink`);
-      await sendSignInLinkToEmail(auth, email, {
-        handleCodeInApp: true,
-        url: `${location.protocol}//${location.host}/emailLink?email=${email}`,
+      // Upload image
+      let imageKey: string;
+      try {
+        const res = await uploadDPMutation.mutateAsync(dp!);
+        imageKey = res.id;
+      } catch {
+        return {
+          status: 'fail',
+          errors: [
+            {
+              field: ['dp'],
+              message: 'Það kom upp villa við að hlaða upp myndinni',
+            },
+          ],
+        };
+      }
+
+      // Create user in Worker
+      const { error } = await createUserMutation.mutateAsync({
+        name,
+        email,
+        phone,
+        kennitala: kt.clean(kennitala),
+        isInEconomics,
+        year,
+        imageKey,
       });
+
+      if (error) return { status: 'fail', errors: [error] };
+
+      router.push(
+        `/signup/success${isInEconomics && year !== 'first' ? '?a' : ''}`,
+      );
+
       return { status: 'success' };
     },
   });

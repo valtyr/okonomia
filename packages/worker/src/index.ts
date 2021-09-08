@@ -1,12 +1,23 @@
 import { JwtPayload } from '@cfworker/jwt';
 import { Router } from 'itty-router';
-import { Request as CloudflareRequest } from 'miniflare';
-import { fetchAsset } from './lib/assets';
 import { validateSession } from './lib/auth';
 import { UserStore } from './lib/kv';
-import generatePass from './lib/pass';
 import { log } from './lib/sentry';
-import { allUsers, createUser } from './routes/user';
+import { getJpeg, getPng, uploadImage } from './routes/images';
+import {
+  allUsers,
+  createUser,
+  deleteUser,
+  demoteUserToMember,
+  idForUser,
+  promoteUserToAdmin,
+  setHasPaid,
+  watchUsers,
+} from './routes/user';
+
+// START DURABLE OBJECTS
+export { default as UserWatcher } from './lib/do/UserWatcher';
+// END DURABLE OBJECTS
 
 const router = Router({
   base: '/api',
@@ -18,126 +29,26 @@ export type AugmentedEnvironment = Env & {
 
 // User routes
 router.get('/users', allUsers);
+router.get('/users/watch', watchUsers);
 router.post('/user/create', createUser);
+router.delete('/user/:id', deleteUser);
+router.put('/user/:id/admin', promoteUserToAdmin);
+router.delete('/user/:id/admin', demoteUserToMember);
+router.post('/user/:id/payment', setHasPaid);
+router.get('/user/pass/:id', idForUser);
 
-router.get(
-  '/protected',
-  async (request: CloudflareRequest, env: AugmentedEnvironment) => {
-    let session: JwtPayload | null = null;
-    try {
-      session = await validateSession(request);
-    } catch (e) {
-      return new Response('Unauthorized', {
-        status: 401,
-        statusText: 'Unauthorized',
-        headers: {
-          'X-JWT-REASON': (e as any).toString(),
-        },
-      });
-    }
-
-    return new Response(JSON.stringify(session, undefined, 2), {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  },
-);
-
-// Test routes
-router.get(
-  '/zip',
-  async (request: CloudflareRequest, env: AugmentedEnvironment) => {
-    if (!env.PASSBOOK_CERT || !env.PASSBOOK_PRIVATE_KEY)
-      throw new Error(
-        'PASSBOOK_CERT and PASSBOOK_PRIVATE_KEY should be provided as environment variables',
-      );
-
-    const template = await fetchAsset('assets/template.pkpass', env);
-    const zip = await generatePass(
-      template,
-      {
-        organizationName: 'Ökonomía',
-        backgroundColor: 'rgb(248,243,243)',
-        foregroundColor: 'rgb(3,3,3)',
-        logoText: 'Ökonomía',
-        // locations: [
-        //   {
-        //     latitude: 33.947736800000001267108018510043621063232421875,
-        //     longitude: -84.143066000000004578396328724920749664306640625,
-        //     relevantText: 'Your local Costco',
-        //   },
-        // ],
-        // barcode: {
-        //   format: 'PKBarcodeFormatPDF417',
-        //   message: '123456789123456789',
-        //   messageEncoding: 'iso-8859-1',
-        //   altText: '123456789123456789',
-        // },
-        generic: {
-          primaryFields: [
-            {
-              key: 'member',
-              label: 'Nafn',
-              value: 'Elín Halla Kjartansdóttir',
-              // changeMessage: 'Member name changed to %@.',
-            },
-          ],
-          secondaryFields: [],
-          auxiliaryFields: [
-            {
-              key: 'membershipNumber',
-              label: 'Meðlimsnúmer',
-              value: '123456789123456789',
-              // changeMessage: 'Changed to %@',
-            },
-            {
-              key: 'memberSince',
-              label: 'Gildistími',
-              value: 'Ágúst 2020 - Júlí 2021',
-            },
-          ],
-          backFields: [
-            {
-              key: 'info',
-              label: 'Afslættir',
-              value:
-                'Þetta kort veitir þér afslætti á drykkjum á eftirfarandi stöðum: \n • Sæta Svínið - 20% \n • Jólahúsið Akureyri - 20%',
-            },
-          ],
-        },
-        serialNumber: '6110757dcaa7dfa0',
-        formatVersion: 1,
-        description: 'Membership card for Ökonomía',
-        passTypeIdentifier: 'pass.skirteini.okonomia.hi.is',
-        teamIdentifier: 'L5TEPZ8S7Z',
-        barcodes: [
-          {
-            format: 'PKBarcodeFormatPDF417',
-            message: '6110757dcaa70',
-            messageEncoding: 'iso-8859-1',
-          },
-        ],
-      },
-      env.PASSBOOK_CERT,
-      env.PASSBOOK_PRIVATE_KEY,
-    );
-    return new Response(zip, {
-      headers: {
-        'Content-Type': 'application/vnd.apple.pkpass',
-        'Content-Disposition': 'attachment; filename="okonomia.pkpass"',
-      },
-    });
-  },
-);
+// Image routes
+router.put('/dp/upload', uploadImage);
+router.get('/dp/:id', getJpeg);
+router.get('/dp/png/:id', getPng);
 
 // Index route
-router.get('/', async (r: CloudflareRequest) => {
-  const cloudflareInfo = (r as CloudflareRequest).cf || { time: new Date() };
+router.get('/', async (r: Request, env: AugmentedEnvironment) => {
+  const cloudflareInfo = (r as Request).cf || { time: new Date() };
 
   let session: JwtPayload | null = null;
   try {
-    session = await validateSession(r);
+    session = await validateSession(r, env, false);
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
@@ -182,7 +93,7 @@ router.get(
 );
 
 export default {
-  async fetch(req: CloudflareRequest, env: Env) {
+  async fetch(req: Request, env: Env) {
     const augmentedEnvironment: AugmentedEnvironment = {
       ...env,
       kv: {
@@ -200,6 +111,7 @@ export default {
       // Log error
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       log(e as any, req);
+      console.error(`ENV: ${JSON.stringify(Object.keys(env))}`);
 
       return new Response('Unexpected error', {
         status: 500,

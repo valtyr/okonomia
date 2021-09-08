@@ -31,3 +31,15 @@ export const APIResponse = (response: HandlerResponse) => {
     },
   });
 };
+
+export const API400 = () =>
+  new Response('400 Bad Request', {
+    status: 400,
+    statusText: 'Bad Request',
+  });
+
+export const API404 = () =>
+  new Response('404 Not Found', {
+    status: 404,
+    statusText: 'Not Found',
+  });

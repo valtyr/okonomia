@@ -9,6 +9,9 @@ declare global {
   interface Env {
     USERS: KVNamespace;
     ASSETS: KVNamespace;
+    BUCKET: KVNamespace;
+
+    USER_WATCHER: DurableObjectNamespace;
 
     __STATIC_CONTENT_MANIFEST: string | Record<string, string>;
     __STATIC_CONTENT: KVNamespace;
@@ -24,5 +27,22 @@ declare global {
    * Git hash of current commit. Will be ambiguous in development.
    */
   const GIT_HASH: string;
-  const env: Env;
+
+  // Missing types
+  interface WebSocket {
+    accept(): void;
+  }
+
+  class WebSocketPair {
+    0: WebSocket;
+    1: WebSocket;
+  }
+
+  interface ResponseInit {
+    webSocket?: WebSocket;
+  }
+
+  interface Request {
+    params?: { [_: string]: string };
+  }
 }

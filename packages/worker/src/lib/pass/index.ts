@@ -27,6 +27,7 @@ const generatePass = async (
   pass: PKPass,
   certificate: string,
   privateKey: string,
+  thumbnail?: ArrayBuffer | null,
 ) => {
   // Open the template file as .zip
   const zip = await JSZip.loadAsync(templateBuffer);
@@ -40,6 +41,13 @@ const generatePass = async (
 
   // Add new pass.json file
   zip.file('pass.json', Buffer.from(passText));
+
+  // Add thumbnail
+  if (thumbnail) {
+    zip.file('thumbnail.png', thumbnail);
+    zip.file('thumbnail@2x.png', thumbnail);
+    zip.file('thumbnail@3x.png', thumbnail);
+  }
 
   // Generate manifest.json file
   const files = Object.entries(zip.files);
