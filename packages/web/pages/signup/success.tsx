@@ -54,7 +54,7 @@ const Success: NextPage = () => {
           <div className="text-gray-500">Kennitala: </div>
           <pre>481288-3049</pre>
           <div className="text-gray-500">Reikningsnúmer: </div>
-          <pre>311-26-3991</pre>
+          <pre>0311-26-003991</pre>
         </div>
 
         <p className="text-center text-sm px-4 py-3 text-gray-400">
