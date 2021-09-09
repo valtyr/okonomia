@@ -148,7 +148,7 @@ const Signup: NextPage = () => {
                 />
               </Label>
 
-              <Label label="Mynd á skírteini" htmlFor="dp">
+              <Label label="Mynd fyrir skírteini" htmlFor="dp">
                 <DPUpload id="dp" {...dp} />
               </Label>
 
