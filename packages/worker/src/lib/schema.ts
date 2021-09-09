@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
+const trim = (s: string) => s.trim();
+
 export const User = z.object({
   id: z.string(),
-  name: z.string(),
-  phone: z.string(),
-  kennitala: z.string(),
-  email: z.string().email(),
+  name: z.string().transform(trim),
+  phone: z.string().transform(trim),
+  kennitala: z.string().transform(trim),
+  email: z.string().email().transform(trim),
   isInEconomics: z.boolean(),
   imageKey: z.string(),
   hasPaid: z.boolean().default(false),
