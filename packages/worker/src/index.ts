@@ -11,6 +11,7 @@ import {
   demoteUserToMember,
   idForUser,
   promoteUserToAdmin,
+  sendUserPass,
   setHasPaid,
   watchUsers,
 } from './routes/user';
@@ -36,6 +37,7 @@ router.put('/user/:id/admin', promoteUserToAdmin);
 router.delete('/user/:id/admin', demoteUserToMember);
 router.post('/user/:id/payment', setHasPaid);
 router.get('/user/pass/:id', idForUser);
+router.post('/user/:id/pass/send', sendUserPass);
 
 // Image routes
 router.put('/dp/upload', uploadImage);

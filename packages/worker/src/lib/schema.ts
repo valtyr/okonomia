@@ -12,6 +12,7 @@ export const User = z.object({
   imageKey: z.string(),
   hasPaid: z.boolean().default(false),
   isAdmin: z.boolean().default(false),
+  hasReceivedPass: z.boolean().default(false),
   year: z.enum(['first', 'second', 'third', 'other']),
 });
 export type User = z.infer<typeof User>;

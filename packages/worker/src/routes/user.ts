@@ -3,10 +3,11 @@ import { fetchAsset } from '../lib/assets';
 import { validateSession } from '../lib/auth';
 import { UserStore } from '../lib/kv';
 import { API400, API404, APIRequestHandler, APIResponse } from '../lib/route';
-import { CreateUserInput } from '../lib/schema';
+import { CreateUserInput, User } from '../lib/schema';
 import generatePass from '../lib/pass';
 import { imageKey } from './images';
 import { AugmentedEnvironment } from '..';
+import { sendPass } from '../lib/mailgun';
 
 const pingWatcher = async (request: Request, env: AugmentedEnvironment) => {
   const id = env.USER_WATCHER.idFromName('okonomia');
@@ -25,6 +26,7 @@ export const createUser: APIRequestHandler = async (request, env) => {
     ...data,
     hasPaid: false,
     isAdmin: false,
+    hasReceivedPass: false,
     id: nanoid(),
   };
 
@@ -242,45 +244,62 @@ export const idForUser: APIRequestHandler = async (request, env) => {
     imageKey(user.imageKey, 'png'),
     'arrayBuffer',
   );
-  const template = await fetchAsset('assets/template.pkpass', env);
+  const template = await fetchAsset('assets/templateWithLogos.pkpass', env);
+
+  const yearString = (user: User) => {
+    switch (user.year) {
+      case 'first':
+        return 'Fyrsta ár';
+      case 'second':
+        return 'Annað ár';
+      case 'third':
+        return 'Þriðja ár';
+      default:
+        return '-';
+    }
+  };
+
+  const aux = user.isInEconomics
+    ? [
+        {
+          key: 'year',
+          label: 'Námsár',
+          value: yearString(user),
+        },
+      ]
+    : [];
+
   const zip = await generatePass(
     template,
     {
       organizationName: 'Ökonomía',
       backgroundColor: 'rgb(248,243,243)',
       foregroundColor: 'rgb(3,3,3)',
-      logoText: 'Ökonomía',
+      // logoText: 'Ökonomía',
       generic: {
         primaryFields: [
           {
             key: 'member',
             label: 'Nafn',
             value: user.name,
-            // changeMessage: 'Member name changed to %@.',
           },
         ],
-        secondaryFields: [],
+        secondaryFields: [...aux],
         auxiliaryFields: [
-          {
-            key: 'membershipNumber',
-            label: 'Meðlimsnúmer',
-            value: '123456789123456789',
-            // changeMessage: 'Changed to %@',
-          },
           {
             key: 'memberSince',
             label: 'Gildistími',
             value: 'Ágúst 2020 - Júlí 2021',
           },
         ],
-        backFields: [
-          {
-            key: 'info',
-            label: 'Afslættir',
-            value:
-              'Þetta kort veitir þér afslætti á drykkjum á eftirfarandi stöðum: \n • Sæta Svínið - 20% \n • Jólahúsið Akureyri - 20%',
-          },
-        ],
+        // backFields: [
+        //   {
+        //     key: 'info',
+        //     label: 'Afslættir',
+        //     value:
+        //       'Þetta kort veitir þér afslætti á drykkjum á eftirfarandi stöðum: \n • Sæta Svínið - 20% \n • Jólahúsið Akureyri - 20%',
+        //   },
+        // ],
       },
       serialNumber: '6110757dcaa7dfa0',
       formatVersion: 1,
@@ -290,7 +309,7 @@ export const idForUser: APIRequestHandler = async (request, env) => {
       barcodes: [
         {
           format: 'PKBarcodeFormatPDF417',
-          message: '6110757dcaa70',
+          message: user.id,
           messageEncoding: 'iso-8859-1',
         },
       ],
@@ -303,6 +322,40 @@ export const idForUser: APIRequestHandler = async (request, env) => {
     headers: {
       'Content-Type': 'application/vnd.apple.pkpass',
       'Content-Disposition': 'attachment; filename="okonomia.pkpass"',
+    },
+  });
+};
+
+export const sendUserPass: APIRequestHandler = async (request, env) => {
+  try {
+    await validateSession(request, env);
+  } catch (e) {
+    return new Response('Unauthorized', {
+      status: 401,
+      statusText: 'Unauthorized',
+      headers: {
+        'X-Reason': e,
+      },
+    });
+  }
+
+  const id = request.params?.id;
+  if (!id) return API400();
+
+  const user = await UserStore(env).get(id);
+  if (!user) return API400();
+
+  await sendPass(user, env);
+
+  const updatedUser = {
+    ...user,
+    hasReceivedPass: true,
+  };
+  await UserStore(env).put(id, updatedUser);
+
+  return APIResponse({
+    data: {
+      success: true,
     },
   });
 };
