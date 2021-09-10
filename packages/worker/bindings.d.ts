@@ -19,6 +19,7 @@ declare global {
     PASSBOOK_CERT?: string;
     PASSBOOK_PRIVATE_KEY?: string;
     FIREBASE_CERT?: string;
+    MAILGUN_API_KEY?: string;
 
     ENVIRONMENT?: string;
   }

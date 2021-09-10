@@ -11,6 +11,7 @@ export interface User {
   imageKey: string;
   hasPaid: boolean;
   isAdmin: boolean;
+  hasReceivedPass?: boolean;
   id: string;
 }
 
@@ -135,6 +136,37 @@ export const useSetHasPaidMutation = () =>
             old?.users.map((user) => {
               if (user.id !== id) return user;
               return { ...user, hasPaid };
+            }) || [],
+        }));
+        return { previousUsers };
+      },
+      onError: (err, newTodo, context) => {
+        if (context?.previousUsers)
+          queryClient.setQueryData('users', context.previousUsers);
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries('users');
+      },
+    },
+  );
+
+export const useSendPassMutation = () =>
+  useMutation(
+    (id: string) =>
+      fetch(`/api/user/${id}/pass/send`, {
+        method: 'POST',
+      }),
+    {
+      onMutate: async (id: string) => {
+        await queryClient.cancelQueries('users');
+        const previousUsers = await queryClient.getQueryData<UsersResponse>(
+          'users',
+        );
+        queryClient.setQueryData<UsersResponse>('users', (old) => ({
+          users:
+            old?.users.map((user) => {
+              if (user.id !== id) return user;
+              return { ...user, hasReceivedPass: true };
             }) || [],
         }));
         return { previousUsers };

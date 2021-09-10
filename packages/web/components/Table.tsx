@@ -11,6 +11,7 @@ import {
   CheckIcon,
   DotFilledIcon,
   DotsVerticalIcon,
+  EnvelopeClosedIcon,
   IdCardIcon,
   MagicWandIcon,
   MagnifyingGlassIcon,
@@ -46,6 +47,7 @@ import {
   useDemoteToMemberMutation,
   usePromoteToAdminMutation,
   User,
+  useSendPassMutation,
   useSetHasPaidMutation,
 } from '../lib/queries';
 import AlertDialog from './Alert';
@@ -125,6 +127,7 @@ const TableActions: React.FC<{ value: User }> = ({ value }) => {
   const deleteUser = useDeleteUserMutation();
   const promoteToAdmin = usePromoteToAdminMutation();
   const demoteToMember = useDemoteToMemberMutation();
+  const sendPass = useSendPassMutation();
   const setHasPaid = useSetHasPaidMutation();
   const [alertOpen, setAlertOpen] = useState(false);
 
@@ -159,7 +162,7 @@ const TableActions: React.FC<{ value: User }> = ({ value }) => {
       <DropdownMenu>
         <DropdownMenuTrigger>
           <FocusRing>
-            <div className="outline-none select-none rounded-full p-1 -m-1 text-gray-300">
+            <div className="outline-none select-none rounded-full p-6 -m-3  text-gray-300">
               <DotsVerticalIcon />
             </div>
           </FocusRing>
@@ -168,13 +171,21 @@ const TableActions: React.FC<{ value: User }> = ({ value }) => {
           <DropdownMenuArrow />
           <DropdownMenuItem
             onSelect={() => {
-              console.log('ID');
               window?.open(`/api/user/pass/${value.id}`, '_blank')?.focus();
             }}
           >
             Sækja skírteini
             <RightSlot>
               <IdCardIcon />
+            </RightSlot>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={!value.hasPaid}
+            onSelect={() => sendPass.mutate(value.id)}
+          >
+            Senda skírteini
+            <RightSlot>
+              <EnvelopeClosedIcon />
             </RightSlot>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -269,6 +280,15 @@ const Table: React.FC<{
         Cell: Status,
       },
       {
+        Header: <EnvelopeClosedIcon className="inline" />,
+        accessor: (item: User) => {
+          if (item.hasReceivedPass) return <CheckIcon />;
+          return '';
+        },
+        id: 'mail',
+        disableGlobalFilter: true,
+      },
+      {
         id: 'actions',
         accessor: (user: User) => user,
         Cell: TableActions,
@@ -316,7 +336,7 @@ const Table: React.FC<{
       <main className="rounded-t-lg border border-gray-100 overflow-x-auto">
         <table
           {...getTableProps()}
-          className="w-full divide-y divide-gray-100 text-sm  min-w-[800px] "
+          className="w-full divide-y divide-gray-100 text-sm  min-w-[900px] "
         >
           <thead>
             {headerGroups.map((headerGroup) => (
