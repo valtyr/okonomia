@@ -289,7 +289,7 @@ export const idForUser: APIRequestHandler = async (request, env) => {
           {
             key: 'memberSince',
             label: 'Gildistími',
-            value: 'Ágúst 2020 - Júlí 2021',
+            value: 'Ágúst 2021 - Júlí 2022',
           },
         ],
         // backFields: [
@@ -301,7 +301,7 @@ export const idForUser: APIRequestHandler = async (request, env) => {
         //   },
         // ],
       },
-      serialNumber: '6110757dcaa7dfa0',
+      serialNumber: user.id,
       formatVersion: 1,
       description: 'Membership card for Ökonomía',
       passTypeIdentifier: 'pass.skirteini.okonomia.hi.is',
